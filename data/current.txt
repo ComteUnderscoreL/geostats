@@ -1,1 +1,3 @@
-vOFs1ulXC35OHicE
+challenge_id=vOFs1ulXC35OHicE
+twitch_channel=comte_L
+youtube_playlist=PLHQFZFMnBYhLZmNmTBlrAg27XfiAvELdQ
