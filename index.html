@@ -3,53 +3,77 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>No Move Challenges</title>
+  <title>Stats Challenges</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 <main class="wrap">
   <h1>No Move Challenges</h1>
 
-  <section class="card">
-    <h2>Challenge en cours</h2>
-    <div id="currentMeta" class="muted"></div>
-    <a id="currentLink" class="btn" target="_blank" rel="noopener">Ouvrir le challenge</a>
-  </section>
+  <div class="layout">
+    <div class="main">
+      <section class="card">
+        <h2>Challenge du jour</h2>
+        <div id="currentMeta" class="muted"></div>
+        <a id="currentLink" class="btn" target="_blank" rel="noopener">Ouvrir le challenge</a>
+      </section>
 
-  <section class="card">
-    <h2>Dernier challenge terminé</h2>
-    <div id="lastMeta" class="muted"></div>
-    <a id="lastLink" class="btn" target="_blank" rel="noopener">Ouvrir le challenge</a>
-    <div id="lastLeaderboard"></div>
-  </section>
+      <section class="card">
+        <h2>Dernier challenge terminé</h2>
+        <div id="lastMeta" class="muted"></div>
+        <a id="lastLink" class="btn" target="_blank" rel="noopener">Ouvrir le challenge</a>
+        <div id="lastLeaderboard"></div>
+      </section>
 
-  <section class="card">
-    <h2>Historique</h2>
-    <div id="history"></div>
-  </section>
+      <section class="card">
+        <h2>Historique</h2>
+        <div id="history"></div>
+      </section>
+    </div>
+
+    <aside class="sidebar">
+      <section class="card sticky">
+        <h3>Live 7h30-8h30 Lu-Ve </h3>
+        <div id="twitchWrap" class="embed muted">Aucun live configuré.</div>
+        <h3>Mario Kart Jeudi 21h30</h3>
+        <h3>Playlist Challenges No Move</h3>
+        <div id="ytWrap" class="embed muted">Aucune playlist configurée.</div>
+      </section>
+    </aside>
+  </div>
 </main>
 
 <script>
 const BASE_URL = "https://www.geoguessr.com/challenge/";
 const TOP_N = 10;
 
+function parseKV(text) {
+  const out = {};
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    const m = line.match(/^([^=]+)=(.*)$/);
+    if (m) out[m[1].trim()] = m[2].trim();
+  }
+  return out;
+}
+
 async function loadText(path) {
   const r = await fetch(path, { cache: "no-store" });
   if (!r.ok) return "";
-  return (await r.text()).trim();
+  return await r.text();
 }
 
 async function loadTSV(path) {
-  const res = await fetch(path, { cache: "no-store" });
-  if (!res.ok) throw new Error("Cannot load " + path);
-  const text = await res.text();
-  const lines = text.trim().split("\n");
+  const r = await fetch(path, { cache: "no-store" });
+  if (!r.ok) throw new Error("Cannot load " + path);
+  const lines = (await r.text()).trim().split("\n");
   if (lines.length < 2) return [];
   const cols = lines[0].split("\t");
-  return lines.slice(1).map(r => {
-    const vals = r.split("\t");
+  return lines.slice(1).map(row => {
+    const vals = row.split("\t");
     const o = {};
-    cols.forEach((c,i) => o[c] = vals[i]);
+    cols.forEach((c,i)=>o[c]=vals[i]);
     return o;
   });
 }
@@ -61,76 +85,81 @@ function esc(s) {
 }
 
 function renderLeaderboard(rows) {
-  return `
-    <table>
-      <thead><tr><th>#</th><th>Joueur</th><th class="num">Score</th></tr></thead>
-      <tbody>
-        ${rows.slice(0, TOP_N).map(r =>
-          `<tr><td>${esc(r.position)}</td><td>${esc(r.player)}</td><td class="num">${esc(r.total_score)}</td></tr>`
-        ).join("")}
-      </tbody>
-    </table>
-  `;
+  return `<table>
+    <thead><tr><th>#</th><th>Joueur</th><th class="num">Score</th></tr></thead>
+    <tbody>
+      ${rows.slice(0,TOP_N).map(r =>
+        `<tr><td>${esc(r.position)}</td><td>${esc(r.player)}</td><td class="num">${esc(r.total_score)}</td></tr>`
+      ).join("")}
+    </tbody>
+  </table>`;
 }
 
 function renderHistoryBlock(numero, rows) {
-  const map = rows[0].map || "UNKNOWN_MAP";
-  const cid = rows[0].challenge_id || "";
-  const url = cid ? (BASE_URL + cid) : "#";
+  const url = rows[0].challenge_id ? BASE_URL + rows[0].challenge_id : "#";
+  return `<article class="subcard">
+    <div class="row">
+      <div class="title">#${esc(numero)} — ${esc(rows[0].map)}</div>
+      <a class="btn small" href="${esc(url)}" target="_blank">Lien</a>
+    </div>
+    ${renderLeaderboard(rows)}
+  </article>`;
+}
 
-  return `
-    <article class="subcard">
-      <div class="row">
-        <div class="title">#${esc(numero)} — ${esc(map)}</div>
-        <a class="btn small" href="${esc(url)}" target="_blank" rel="noopener">Lien</a>
-      </div>
-      ${renderLeaderboard(rows)}
-    </article>
-  `;
+function renderTwitch(channel) {
+  const parent = encodeURIComponent(location.hostname);
+  const src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parent}&muted=true`;
+  return `<iframe src="${src}" height="300" allowfullscreen frameborder="0"></iframe>`;
+}
+
+function renderYT(pl) {
+  const src = `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(pl)}`;
+  return `<iframe src="${src}" height="300" allowfullscreen frameborder="0"></iframe>`;
 }
 
 (async () => {
-  // Current challenge
-  const currentId = await loadText("data/current.txt");
-  if (currentId) {
-    document.getElementById("currentMeta").textContent = "Challenge du jour";
-    document.getElementById("currentLink").href = BASE_URL + currentId;
+  const cfg = parseKV(await loadText("data/current.txt"));
+  if (cfg.challenge_id) {
+    document.getElementById("currentMeta").textContent = "Challenge en cours";
+    document.getElementById("currentLink").href = BASE_URL + cfg.challenge_id;
   } else {
-    document.getElementById("currentMeta").textContent = "Aucun challenge en cours.";
+    document.getElementById("currentMeta").textContent = "Aucun challenge en cours";
     document.getElementById("currentLink").style.display = "none";
   }
 
-  // Finished challenges
+  if (cfg.twitch_channel) {
+    const el = document.getElementById("twitchWrap");
+    el.classList.remove("muted");
+    el.innerHTML = renderTwitch(cfg.twitch_channel);
+  }
+  if (cfg.youtube_playlist) {
+    const el = document.getElementById("ytWrap");
+    el.classList.remove("muted");
+    el.innerHTML = renderYT(cfg.youtube_playlist);
+  }
+
   const totals = await loadTSV("data/totals.tsv");
   if (!totals.length) return;
 
   const byNumero = {};
   for (const r of totals) {
     const n = Number(r.Numero);
-    if (!Number.isFinite(n)) continue;
-    (byNumero[n] ||= []).push(r);
+    if (!byNumero[n]) byNumero[n] = [];
+    byNumero[n].push(r);
   }
-
   const numeros = Object.keys(byNumero).map(Number).sort((a,b)=>b-a);
+  for (const n of numeros) byNumero[n].sort((a,b)=>a.position-b.position);
+
   const last = numeros[0];
-
-  for (const n of numeros) {
-    byNumero[n].sort((a,b)=>Number(a.position) - Number(b.position));
-  }
-
-  const lastRows = byNumero[last];
   document.getElementById("lastMeta").textContent =
-    `Challenge #${last} — ${lastRows[0].map || "UNKNOWN_MAP"}`;
+    `Challenge #${last} — ${byNumero[last][0].map}`;
   document.getElementById("lastLink").href =
-    BASE_URL + (lastRows[0].challenge_id || "");
+    BASE_URL + (byNumero[last][0].challenge_id || "");
   document.getElementById("lastLeaderboard").innerHTML =
-    renderLeaderboard(lastRows);
+    renderLeaderboard(byNumero[last]);
 
-  const rest = numeros.slice(1);
   document.getElementById("history").innerHTML =
-    rest.length
-      ? rest.map(n => renderHistoryBlock(n, byNumero[n])).join("")
-      : '<div class="muted">Pas encore d’historique.</div>';
+    numeros.slice(1).map(n => renderHistoryBlock(n, byNumero[n])).join("");
 })();
 </script>
 </body>
