@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Stats Challenges</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .medal-icon {
+      width: 26px;
+      height: 26px;
+      vertical-align: middle;
+      display: inline-block;
+    }
+    .medal-cell {
+      width: 42px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
 <main class="wrap">
@@ -33,7 +45,7 @@
 
     <aside class="sidebar">
       <section class="card sticky">
-        <h3>Live 7h30-8h30 Lu-Ve </h3>
+        <h3>Live 7h30-8h30 Lu-Ve</h3>
         <div id="twitchWrap" class="embed muted">Aucun live configuré.</div>
         <h3>Mario Kart Jeudi 21h30</h3>
         <h3>Playlist Challenges No Move</h3>
@@ -46,6 +58,15 @@
 <script>
 const BASE_URL = "https://www.geoguessr.com/challenge/";
 const TOP_N = 10;
+
+const MEDAL_PATHS = {
+  netherite: "medal/netherite.svg",
+  emerald: "medal/emerald.svg",
+  diamond: "medal/diamond.svg",
+  gold: "medal/gold.svg",
+  iron: "medal/iron.svg",
+  copper: "medal/copper.svg"
+};
 
 function parseKV(text) {
   const out = {};
@@ -73,24 +94,65 @@ async function loadTSV(path) {
   return lines.slice(1).map(row => {
     const vals = row.split("\t");
     const o = {};
-    cols.forEach((c,i)=>o[c]=vals[i]);
+    cols.forEach((c, i) => o[c] = vals[i]);
     return o;
   });
 }
 
 function esc(s) {
   return String(s).replace(/[&<>"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
   }[c]));
+}
+
+function toScore(value) {
+  const n = Number(String(value).replace(/[^\d.-]/g, ""));
+  return Number.isFinite(n) ? n : 0;
+}
+
+function getMedalName(score) {
+  if (score >= 24000) return "netherite";
+  if (score >= 23000) return "emerald";
+  if (score >= 22000) return "diamond";
+  if (score >= 20000) return "gold";
+  if (score >= 18000) return "iron";
+  if (score >= 15000) return "copper";
+  return null;
+}
+
+function renderMedal(score) {
+  const medal = getMedalName(score);
+  if (!medal) return "";
+  const src = MEDAL_PATHS[medal];
+  return `<img class="medal-icon" src="${src}" alt="${medal}" title="${medal}">`;
 }
 
 function renderLeaderboard(rows) {
   return `<table>
-    <thead><tr><th>#</th><th>Joueur</th><th class="num">Score</th></tr></thead>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th class="medal-cell">🏅</th>
+        <th>Joueur</th>
+        <th class="num">Score</th>
+      </tr>
+    </thead>
     <tbody>
-      ${rows.slice(0,TOP_N).map(r =>
-        `<tr><td>${esc(r.position)}</td><td>${esc(r.player)}</td><td class="num">${esc(r.total_score)}</td></tr>`
-      ).join("")}
+      ${rows.slice(0, TOP_N).map(r => {
+        const score = toScore(r.total_score);
+        return `
+          <tr>
+            <td>${esc(r.position)}</td>
+            <td class="medal-cell">${renderMedal(score)}</td>
+            <td>${esc(r.player)}</td>
+            <td class="num">${esc(r.total_score)}</td>
+          </tr>
+        `;
+      }).join("")}
     </tbody>
   </table>`;
 }
@@ -106,36 +168,15 @@ function renderHistoryBlock(numero, rows) {
   </article>`;
 }
 
-function renderTwitch(channel) {
-  const parent = encodeURIComponent(location.hostname);
-  const src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parent}&muted=true`;
-  return `<iframe src="${src}" height="300" allowfullscreen frameborder="0"></iframe>`;
-}
-
-function renderYT(pl) {
-  const src = `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(pl)}`;
-  return `<iframe src="${src}" height="300" allowfullscreen frameborder="0"></iframe>`;
-}
-
 (async () => {
   const cfg = parseKV(await loadText("data/current.txt"));
+
   if (cfg.challenge_id) {
     document.getElementById("currentMeta").textContent = "Challenge en cours";
     document.getElementById("currentLink").href = BASE_URL + cfg.challenge_id;
   } else {
     document.getElementById("currentMeta").textContent = "Aucun challenge en cours";
     document.getElementById("currentLink").style.display = "none";
-  }
-
-  if (cfg.twitch_channel) {
-    const el = document.getElementById("twitchWrap");
-    el.classList.remove("muted");
-    el.innerHTML = renderTwitch(cfg.twitch_channel);
-  }
-  if (cfg.youtube_playlist) {
-    const el = document.getElementById("ytWrap");
-    el.classList.remove("muted");
-    el.innerHTML = renderYT(cfg.youtube_playlist);
   }
 
   const totals = await loadTSV("data/totals.tsv");
@@ -147,6 +188,7 @@ function renderYT(pl) {
     if (!byNumero[n]) byNumero[n] = [];
     byNumero[n].push(r);
   }
+
   const numeros = Object.keys(byNumero).map(Number).sort((a,b)=>b-a);
   for (const n of numeros) byNumero[n].sort((a,b)=>a.position-b.position);
 
