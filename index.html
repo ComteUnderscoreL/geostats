@@ -9,12 +9,41 @@
     .medal-icon {
       width: 26px;
       height: 26px;
+      display: block;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,.18));
+    }
+
+    .medal-cell {
+      width: 52px;
+      text-align: center;
       vertical-align: middle;
+    }
+
+    .score-cell {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .score-value {
+      min-width: 72px;
+      text-align: right;
       display: inline-block;
     }
-    .medal-cell {
-      width: 42px;
-      text-align: center;
+
+    .no-medal-spacer {
+      width: 26px;
+      height: 26px;
+      display: inline-block;
+      opacity: 0;
+    }
+
+    table td.num,
+    table th.num {
+      text-align: right;
     }
   </style>
 </head>
@@ -100,7 +129,7 @@ async function loadTSV(path) {
 }
 
 function esc(s) {
-  return String(s).replace(/[&<>"']/g, c => ({
+  return String(s).replace(/[&<>\"']/g, c => ({
     "&":"&amp;",
     "<":"&lt;",
     ">":"&gt;",
@@ -112,6 +141,11 @@ function esc(s) {
 function toScore(value) {
   const n = Number(String(value).replace(/[^\d.-]/g, ""));
   return Number.isFinite(n) ? n : 0;
+}
+
+function formatScore(value) {
+  const score = toScore(value);
+  return score.toLocaleString("fr-FR");
 }
 
 function getMedalName(score) {
@@ -126,9 +160,14 @@ function getMedalName(score) {
 
 function renderMedal(score) {
   const medal = getMedalName(score);
-  if (!medal) return "";
+  if (!medal) return `<span class="no-medal-spacer"></span>`;
   const src = MEDAL_PATHS[medal];
   return `<img class="medal-icon" src="${src}" alt="${medal}" title="${medal}">`;
+}
+
+function renderScore(scoreRaw) {
+  const score = toScore(scoreRaw);
+  return `<div class="score-cell">${renderMedal(score)}<span class="score-value">${esc(formatScore(score))}</span></div>`;
 }
 
 function renderLeaderboard(rows) {
@@ -136,23 +175,19 @@ function renderLeaderboard(rows) {
     <thead>
       <tr>
         <th>#</th>
-        <th class="medal-cell">🏅</th>
         <th>Joueur</th>
         <th class="num">Score</th>
       </tr>
     </thead>
     <tbody>
-      ${rows.slice(0, TOP_N).map(r => {
-        const score = toScore(r.total_score);
-        return `
+      ${rows.slice(0, TOP_N).map(r => `
           <tr>
             <td>${esc(r.position)}</td>
-            <td class="medal-cell">${renderMedal(score)}</td>
             <td>${esc(r.player)}</td>
-            <td class="num">${esc(r.total_score)}</td>
+            <td class="num">${renderScore(r.total_score)}</td>
           </tr>
-        `;
-      }).join("")}
+        `
+      ).join("")}
     </tbody>
   </table>`;
 }
@@ -162,10 +197,21 @@ function renderHistoryBlock(numero, rows) {
   return `<article class="subcard">
     <div class="row">
       <div class="title">#${esc(numero)} — ${esc(rows[0].map)}</div>
-      <a class="btn small" href="${esc(url)}" target="_blank">Lien</a>
+      <a class="btn small" href="${esc(url)}" target="_blank" rel="noopener">Lien</a>
     </div>
     ${renderLeaderboard(rows)}
   </article>`;
+}
+
+function renderTwitch(channel) {
+  const parent = encodeURIComponent(location.hostname);
+  const src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parent}&muted=true`;
+  return `<iframe src="${src}" height="300" allowfullscreen frameborder="0"></iframe>`;
+}
+
+function renderYT(pl) {
+  const src = `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(pl)}`;
+  return `<iframe src="${src}" height="300" allowfullscreen frameborder="0"></iframe>`;
 }
 
 (async () => {
@@ -179,6 +225,18 @@ function renderHistoryBlock(numero, rows) {
     document.getElementById("currentLink").style.display = "none";
   }
 
+  if (cfg.twitch_channel) {
+    const el = document.getElementById("twitchWrap");
+    el.classList.remove("muted");
+    el.innerHTML = renderTwitch(cfg.twitch_channel);
+  }
+
+  if (cfg.youtube_playlist) {
+    const el = document.getElementById("ytWrap");
+    el.classList.remove("muted");
+    el.innerHTML = renderYT(cfg.youtube_playlist);
+  }
+
   const totals = await loadTSV("data/totals.tsv");
   if (!totals.length) return;
 
@@ -190,7 +248,7 @@ function renderHistoryBlock(numero, rows) {
   }
 
   const numeros = Object.keys(byNumero).map(Number).sort((a,b)=>b-a);
-  for (const n of numeros) byNumero[n].sort((a,b)=>a.position-b.position);
+  for (const n of numeros) byNumero[n].sort((a,b)=>Number(a.position)-Number(b.position));
 
   const last = numeros[0];
   document.getElementById("lastMeta").textContent =
