@@ -45,6 +45,54 @@
     table th.num {
       text-align: right;
     }
+  
+    .medal-summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    .medal-summary-table th,
+    .medal-summary-table td {
+      padding: 6px 8px;
+      vertical-align: middle;
+    }
+
+    .medal-summary-table th {
+      text-align: left;
+    }
+
+    .medal-summary-table td.num,
+    .medal-summary-table th.num {
+      text-align: right;
+    }
+
+    .medal-pair {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 8px;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .medal-pair:first-child {
+      margin-left: 0;
+    }
+
+    .medal-pair img {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .player-name-cell {
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
   </style>
 </head>
 <body>
@@ -73,8 +121,14 @@
     </div>
 
     <aside class="sidebar">
+
+      <section class="card">
+        <h3>Classement des médailles</h3>
+        <div id="medalRanking" class="muted">Chargement...</div>
+      </section>
+
       <section class="card sticky">
-        <h3>Live 7h30-8h30 Lu-Ve</h3>
+        <h3>Live </h3>
         <div id="twitchWrap" class="embed muted">Aucun live configuré.</div>
         <h3>Mario Kart Jeudi 21h30</h3>
         <h3>Playlist Challenges No Move</h3>
@@ -203,6 +257,80 @@ function renderHistoryBlock(numero, rows) {
   </article>`;
 }
 
+
+function computeMedalRanking(rows) {
+  const counts = {};
+
+  for (const r of rows) {
+    const player = String(r.player || "").trim();
+    if (!player) continue;
+
+    const medal = getMedalName(toScore(r.total_score));
+    if (!medal) continue;
+
+    if (!counts[player]) {
+      counts[player] = {
+        netherite: 0,
+        emerald: 0,
+        diamond: 0,
+        gold: 0,
+        iron: 0,
+        copper: 0
+      };
+    }
+
+    counts[player][medal]++;
+  }
+
+  return Object.entries(counts).sort((a, b) => {
+    const A = a[1];
+    const B = b[1];
+
+    return (
+      B.netherite - A.netherite ||
+      B.emerald - A.emerald ||
+      B.diamond - A.diamond ||
+      B.gold - A.gold ||
+      B.iron - A.iron ||
+      B.copper - A.copper ||
+      a[0].localeCompare(b[0], "fr", { sensitivity: "base" })
+    );
+  });
+}
+
+function renderMedalPair(name, count) {
+  return `<span class="medal-pair"><img src="${esc(MEDAL_PATHS[name])}" alt="${esc(name)}" title="${esc(name)}"><span>${esc(count)}</span></span>`;
+}
+
+function renderMedalRanking(ranking) {
+  if (!ranking.length) return '<div class="muted">Aucune médaille pour le moment.</div>';
+
+  return `<table class="medal-summary-table">
+    <thead>
+      <tr>
+        <th>Joueur</th>
+        <th class="num">Médailles</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${ranking.map(([player, m]) => `
+        <tr>
+          <td class="player-name-cell">${esc(player)}</td>
+          <td class="num">
+            ${renderMedalPair("netherite", m.netherite)}
+            ${renderMedalPair("emerald", m.emerald)}
+            ${renderMedalPair("diamond", m.diamond)}
+            ${renderMedalPair("gold", m.gold)}
+            ${renderMedalPair("iron", m.iron)}
+            ${renderMedalPair("copper", m.copper)}
+          </td>
+        </tr>
+      `).join("")}
+    </tbody>
+  </table>`;
+}
+
+
 function renderTwitch(channel) {
   const parent = encodeURIComponent(location.hostname);
   const src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parent}&muted=true`;
@@ -239,6 +367,9 @@ function renderYT(pl) {
 
   const totals = await loadTSV("data/totals.tsv");
   if (!totals.length) return;
+
+  const medalRanking = computeMedalRanking(totals);
+  document.getElementById("medalRanking").innerHTML = renderMedalRanking(medalRanking);
 
   const byNumero = {};
   for (const r of totals) {
