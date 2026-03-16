@@ -319,6 +319,34 @@
     text-align: left;
   }
 
+
+  .medal-pair{
+    display:inline-grid !important;
+    grid-template-columns:18px auto;
+    align-items:center;
+    justify-content:end;
+    column-gap:4px;
+  }
+
+  .medal-pair img{
+    width:18px;
+    height:18px;
+    display:block;
+    transform:none !important;
+  }
+
+  .medal-grid .medal-pair:first-child{
+    transform:none !important;
+  }
+
+  .medal-pair img[src*="netherite.svg"]{
+    transform:translateX(1px) !important;
+  }
+
+  .medal-pair img[src*="gold.svg"]{
+    transform:translateX(1px) translateY(-1px) !important;
+  }
+
 </style>
   <style>
     .medal-icon {
@@ -370,6 +398,34 @@
     text-align: left;
   }
 
+
+  .medal-pair{
+    display:inline-grid !important;
+    grid-template-columns:18px auto;
+    align-items:center;
+    justify-content:end;
+    column-gap:4px;
+  }
+
+  .medal-pair img{
+    width:18px;
+    height:18px;
+    display:block;
+    transform:none !important;
+  }
+
+  .medal-grid .medal-pair:first-child{
+    transform:none !important;
+  }
+
+  .medal-pair img[src*="netherite.svg"]{
+    transform:translateX(1px) !important;
+  }
+
+  .medal-pair img[src*="gold.svg"]{
+    transform:translateX(1px) translateY(-1px) !important;
+  }
+
 </style>
 </head>
 <body>
@@ -403,7 +459,7 @@
         <div id="medalRanking" class="muted">Chargement...</div>
       </section>
       <section class="card sticky">
-        <h3>Live:</h3>
+        <h3>Live 7h30-8h30 Lu-Ve</h3>
         <div id="twitchWrap" class="embed muted">Aucun live configuré.</div>
         <h3>Mario Kart Jeudi 21h30</h3>
         <h3>Playlist Challenges No Move</h3>
