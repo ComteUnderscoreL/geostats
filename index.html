@@ -4,429 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Stats Challenges</title>
-  <style>
-  :root{
-    --bg-main:#081120;
-    --bg-grad-1:#0b1730;
-    --bg-grad-2:#0f1f3d;
-    --bg-card:rgba(16, 27, 52, 0.92);
-    --bg-card-2:rgba(22, 36, 68, 0.95);
-    --bg-hover:rgba(36, 57, 104, 0.98);
-    --text-main:#e6eefc;
-    --text-soft:#c6d4f3;
-    --text-muted:#8ea4d6;
-    --accent:#61a8ff;
-    --accent-2:#8f7dff;
-    --border:rgba(120, 160, 255, 0.18);
-    --shadow:0 16px 48px rgba(0,0,0,.35);
-    --shadow-soft:0 8px 24px rgba(19, 58, 128, .22);
-    --table-stripe:rgba(255,255,255,.025);
-  }
-
-  * { box-sizing: border-box; }
-
-  html, body {
-    margin: 0;
-    padding: 0;
-  }
-
-  body{
-    min-height:100vh;
-    background:
-      radial-gradient(circle at top left, rgba(97,168,255,.12), transparent 28%),
-      radial-gradient(circle at top right, rgba(143,125,255,.10), transparent 24%),
-      linear-gradient(180deg, var(--bg-grad-1), var(--bg-main) 35%, #060d18 100%);
-    color:var(--text-main);
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    line-height:1.45;
-  }
-
-  a{ color:var(--accent); }
-
-  .wrap{
-    max-width:1400px;
-    margin:0 auto;
-    padding:28px 20px 40px;
-  }
-
-  h1{
-    margin:0 0 18px;
-    font-size:2.1rem;
-    font-weight:800;
-    letter-spacing:.01em;
-    color:#fff;
-    text-shadow:0 4px 18px rgba(97,168,255,.18);
-  }
-
-  h2,h3{
-    margin:0 0 14px;
-    color:#fff;
-    font-weight:700;
-  }
-
-  .layout{
-    display:grid;
-    grid-template-columns:minmax(0, 1fr) 360px;
-    gap:22px;
-    align-items:start;
-  }
-
-  .main{
-    display:grid;
-    gap:20px;
-  }
-
-  .sidebar{
-    display:grid;
-    gap:20px;
-  }
-
-  .card,
-  .subcard{
-    background:linear-gradient(180deg, var(--bg-card-2), var(--bg-card));
-    border:1px solid var(--border);
-    border-radius:18px;
-    box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.04);
-    backdrop-filter: blur(10px);
-  }
-
-  .card{
-    padding:18px 18px 16px;
-  }
-
-  .subcard{
-    padding:14px;
-    margin-top:14px;
-  }
-
-  .sticky{
-    position:sticky;
-    top:18px;
-  }
-
-  .muted{
-    color:var(--text-muted);
-  }
-
-  .row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
-  }
-
-  .title{
-    color:var(--text-soft);
-    font-weight:700;
-  }
-
-  .btn{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-    min-height:40px;
-    padding:0 14px;
-    margin-top:10px;
-    border-radius:12px;
-    text-decoration:none;
-    color:#fff;
-    background:linear-gradient(135deg, #1e3a8a, #172554);
-    box-shadow:0 8px 24px rgba(59,130,246,.28);
-    font-weight:700;
-    border:1px solid rgba(255,255,255,.08);
-    transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease;
-  }
-
-  .btn:hover{
-    transform:translateY(-1px);
-    box-shadow:0 12px 28px rgba(30,58,138,.45);
-  }
-
-  .btn.small{
-    min-height:34px;
-    padding:0 12px;
-    margin-top:0;
-    font-size:.92rem;
-  }
-
-  .embed{
-    min-height:72px;
-    border:1px dashed var(--border);
-    border-radius:14px;
-    padding:10px;
-    background:rgba(255,255,255,.02);
-  }
-
-  .embed iframe{
-    width:100%;
-    border:0;
-    border-radius:12px;
-    background:#000;
-  }
-
-  table{
-    width:100%;
-    border-collapse:collapse;
-    overflow:hidden;
-    border-radius:14px;
-    background:rgba(255,255,255,.015);
-  }
-
-  thead th{
-    text-align:left;
-    color:#fff;
-    background:rgba(255,255,255,.04);
-    border-bottom:1px solid var(--border);
-    font-size:.94rem;
-  }
-
-  th, td{
-    padding:10px 12px;
-    border-bottom:1px solid rgba(120,160,255,.09);
-  }
-
-  tbody tr:nth-child(odd){
-    background:var(--table-stripe);
-  }
-
-  tbody tr:hover{
-    background:rgba(97,168,255,.06);
-  }
-
-  td.num, th.num{
-    text-align:right;
-  }
-
-  .medal-icon {
-    width: 26px;
-    height: 26px;
-    display: block;
-    filter: drop-shadow(0 2px 3px rgba(0,0,0,.18));
-  }
-
-  .score-cell {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .score-value {
-    min-width: 72px;
-    text-align: right;
-    display: inline-block;
-  }
-
-  .no-medal-spacer {
-    width: 26px;
-    height: 26px;
-    display: inline-block;
-    opacity: 0;
-    flex: 0 0 26px;
-  }
-
-  .medal-summary-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.95rem;
-  }
-
-  .medal-summary-table th,
-  .medal-summary-table td {
-    padding: 8px 8px;
-    vertical-align: middle;
-  }
-
-  .medal-summary-table th {
-    text-align: left;
-  }
-
-  .medal-summary-table td.num,
-  .medal-summary-table th.num {
-    text-align: right;
-  }
-
-  .medal-grid {
-      display:grid;
-      grid-template-columns: repeat(3, auto);
-      gap:6px 10px;
-      justify-content:end;
-    }
-
-    .medal-pair {
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 4px;
-    margin-left: 0;
-    min-width: 46px;
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .medal-pair:first-child {
-    margin-left: 0;
-  }
-
-  .medal-pair img {
-      transform: translateY(1px);
-    width: 18px;
-    height: 18px;
-    display: block;
-  }
-
-  .player-name-cell {
-    max-width: 180px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  @media (max-width: 1080px){
-    .layout{
-      grid-template-columns:1fr;
-    }
-    .sticky{
-      position:static;
-    }
-  }
-
-  @media (max-width: 680px){
-    .wrap{
-      padding:18px 12px 28px;
-    }
-    .card{
-      padding:14px;
-    }
-    th, td{
-      padding:8px 8px;
-      font-size:.92rem;
-    }
-    .score-value{
-      min-width:auto;
-    }
-  }
-
-  .medal-grid .medal-pair:first-child{
-    transform: translateX(3px);
-  }
-
-  .medal-grid .medal-pair span{
-    min-width: 10px;
-    text-align: left;
-  }
-
-
-  .medal-pair{
-    display:inline-grid !important;
-    grid-template-columns:18px auto;
-    align-items:center;
-    justify-content:end;
-    column-gap:4px;
-  }
-
-  .medal-pair img{
-    width:18px;
-    height:18px;
-    display:block;
-    transform:none !important;
-  }
-
-  .medal-grid .medal-pair:first-child{
-    transform:none !important;
-  }
-
-  .medal-pair img[src*="netherite.svg"]{
-    transform:translateX(1px) !important;
-  }
-
-  .medal-pair img[src*="gold.svg"]{
-    transform:translateX(1px) translateY(-1px) !important;
-  }
-
-</style>
-  <style>
-    .medal-icon {
-      width: 26px;
-      height: 26px;
-      display: block;
-      filter: drop-shadow(0 2px 3px rgba(0,0,0,.18));
-    }
-
-    .medal-cell {
-      width: 52px;
-      text-align: center;
-      vertical-align: middle;
-    }
-
-    .score-cell {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 8px;
-      white-space: nowrap;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .score-value {
-      min-width: 72px;
-      text-align: right;
-      display: inline-block;
-    }
-
-    .no-medal-spacer {
-      width: 26px;
-      height: 26px;
-      display: inline-block;
-      opacity: 0;
-    }
-
-    table td.num,
-    table th.num {
-      text-align: right;
-    }
-  
-  .medal-grid .medal-pair:first-child{
-    transform: translateX(3px);
-  }
-
-  .medal-grid .medal-pair span{
-    min-width: 10px;
-    text-align: left;
-  }
-
-
-  .medal-pair{
-    display:inline-grid !important;
-    grid-template-columns:18px auto;
-    align-items:center;
-    justify-content:end;
-    column-gap:4px;
-  }
-
-  .medal-pair img{
-    width:18px;
-    height:18px;
-    display:block;
-    transform:none !important;
-  }
-
-  .medal-grid .medal-pair:first-child{
-    transform:none !important;
-  }
-
-  .medal-pair img[src*="netherite.svg"]{
-    transform:translateX(1px) !important;
-  }
-
-  .medal-pair img[src*="gold.svg"]{
-    transform:translateX(1px) translateY(-1px) !important;
-  }
-
-</style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 <main class="wrap">
@@ -448,18 +26,29 @@
       </section>
 
       <section class="card">
-        <h2>Historique</h2>
+        <h2 id="seasonHistoryTitle">Historique</h2>
         <div id="history"></div>
+      </section>
+
+      <section class="card">
+        <h2>Archives</h2>
+        <div id="archives" class="archive-list muted">Aucune archive pour le moment.</div>
       </section>
     </div>
 
     <aside class="sidebar">
       <section class="card">
-        <h3>Classement des médailles</h3>
-        <div id="medalRanking" class="muted">Chargement...</div>
+        <h3>Classement des médailles <small>— saison en cours</small></h3>
+        <div id="seasonMedalRanking" class="muted">Chargement...</div>
       </section>
+
+      <section class="card">
+        <h3>Classement des médailles <small>— total</small></h3>
+        <div id="totalMedalRanking" class="muted">Chargement...</div>
+      </section>
+
       <section class="card sticky">
-        <h3>Live :</h3>
+        <h3>Live 7h30-8h30 Lu-Ve</h3>
         <div id="twitchWrap" class="embed muted">Aucun live configuré.</div>
         <h3>Mario Kart Jeudi 21h30</h3>
         <h3>Playlist Challenges No Move</h3>
@@ -502,24 +91,29 @@ async function loadText(path) {
 async function loadTSV(path) {
   const r = await fetch(path, { cache: "no-store" });
   if (!r.ok) throw new Error("Cannot load " + path);
-  const lines = (await r.text()).trim().split("\n");
+
+  const text = (await r.text()).trim();
+  if (!text) return [];
+
+  const lines = text.split(/\r?\n/);
   if (lines.length < 2) return [];
+
   const cols = lines[0].split("\t");
   return lines.slice(1).map(row => {
     const vals = row.split("\t");
     const o = {};
-    cols.forEach((c, i) => o[c] = vals[i]);
+    cols.forEach((c, i) => o[c] = vals[i] ?? "");
     return o;
   });
 }
 
 function esc(s) {
-  return String(s).replace(/[&<>\"']/g, c => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#39;"
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
   }[c]));
 }
 
@@ -529,8 +123,7 @@ function toScore(value) {
 }
 
 function formatScore(value) {
-  const score = toScore(value);
-  return score.toLocaleString("fr-FR");
+  return toScore(value).toLocaleString("fr-FR");
 }
 
 function getMedalName(score) {
@@ -545,9 +138,9 @@ function getMedalName(score) {
 
 function renderMedal(score) {
   const medal = getMedalName(score);
-  if (!medal) return `<span class="no-medal-spacer"></span>`;
+  if (!medal) return '<span class="no-medal-spacer"></span>';
   const src = MEDAL_PATHS[medal];
-  return `<img class="medal-icon" src="${src}" alt="${medal}" title="${medal}">`;
+  return `<img class="medal-icon" src="${esc(src)}" alt="${esc(medal)}" title="${esc(medal)}">`;
 }
 
 function renderScore(scoreRaw) {
@@ -566,13 +159,12 @@ function renderLeaderboard(rows) {
     </thead>
     <tbody>
       ${rows.slice(0, TOP_N).map(r => `
-          <tr>
-            <td>${esc(r.position)}</td>
-            <td>${esc(r.player)}</td>
-            <td class="num">${renderScore(r.total_score)}</td>
-          </tr>
-        `
-      ).join("")}
+        <tr>
+          <td>${esc(r.position)}</td>
+          <td>${esc(r.player)}</td>
+          <td class="num">${renderScore(r.total_score)}</td>
+        </tr>
+      `).join("")}
     </tbody>
   </table>`;
 }
@@ -587,7 +179,6 @@ function renderHistoryBlock(numero, rows) {
     ${renderLeaderboard(rows)}
   </article>`;
 }
-
 
 function computeMedalRanking(rows) {
   const counts = {};
@@ -639,7 +230,7 @@ function renderMedalRanking(ranking) {
     <thead>
       <tr>
         <th>Joueur</th>
-        <th class="num"></th>
+        <th class="num">Médailles</th>
       </tr>
     </thead>
     <tbody>
@@ -647,7 +238,14 @@ function renderMedalRanking(ranking) {
         <tr>
           <td class="player-name-cell">${esc(player)}</td>
           <td class="num">
-            <div class="medal-grid"><div class="medal-grid">${renderMedalPair("netherite", m.netherite)}${renderMedalPair("emerald", m.emerald)}${renderMedalPair("diamond", m.diamond)}${renderMedalPair("gold", m.gold)}${renderMedalPair("iron", m.iron)}${renderMedalPair("copper", m.copper)}</div></div>
+            <div class="medal-grid">
+              ${renderMedalPair("netherite", m.netherite)}
+              ${renderMedalPair("emerald", m.emerald)}
+              ${renderMedalPair("diamond", m.diamond)}
+              ${renderMedalPair("gold", m.gold)}
+              ${renderMedalPair("iron", m.iron)}
+              ${renderMedalPair("copper", m.copper)}
+            </div>
           </td>
         </tr>
       `).join("")}
@@ -655,6 +253,66 @@ function renderMedalRanking(ranking) {
   </table>`;
 }
 
+function getCurrentSeason(cfg, totals) {
+  const fromCfg = Number(cfg.saison);
+  if (Number.isFinite(fromCfg)) return fromCfg;
+  const seasons = [...new Set(totals.map(r => Number(r.saison)).filter(Number.isFinite))];
+  return seasons.length ? Math.max(...seasons) : 0;
+}
+
+function groupRowsBySeason(rows) {
+  const out = {};
+  for (const r of rows) {
+    const season = Number(r.saison);
+    if (!Number.isFinite(season)) continue;
+    if (!out[season]) out[season] = [];
+    out[season].push(r);
+  }
+  return out;
+}
+
+function groupRowsByNumero(rows) {
+  const out = {};
+  for (const r of rows) {
+    const n = Number(r.Numero);
+    if (!Number.isFinite(n)) continue;
+    if (!out[n]) out[n] = [];
+    out[n].push(r);
+  }
+  const numeros = Object.keys(out).map(Number).sort((a,b)=>b-a);
+  for (const n of numeros) {
+    out[n].sort((a,b)=>Number(a.position)-Number(b.position));
+  }
+  return { byNumero: out, numeros };
+}
+
+function renderSeasonHistory(rows) {
+  const { byNumero, numeros } = groupRowsByNumero(rows);
+  if (!numeros.length) return '<div class="muted">Aucun challenge dans cette saison.</div>';
+  return numeros.map(n => renderHistoryBlock(n, byNumero[n])).join("");
+}
+
+function renderArchiveSeason(season, rows, open=false) {
+  return `<details class="archive-season"${open ? ' open' : ''}>
+    <summary>Saison ${esc(season)}</summary>
+    <div class="archive-season-content">
+      ${renderSeasonHistory(rows)}
+    </div>
+  </details>`;
+}
+
+function renderArchives(bySeason, currentSeason) {
+  const seasons = Object.keys(bySeason)
+    .map(Number)
+    .filter(s => s !== currentSeason)
+    .sort((a,b)=>b-a);
+
+  if (!seasons.length) {
+    return '<div class="muted">Aucune archive pour le moment.</div>';
+  }
+
+  return seasons.map((season, idx) => renderArchiveSeason(season, bySeason[season], idx === 0)).join("");
+}
 
 function renderTwitch(channel) {
   const parent = encodeURIComponent(location.hostname);
@@ -693,32 +351,54 @@ function renderYT(pl) {
   const totals = await loadTSV("data/totals.tsv");
   if (!totals.length) return;
 
-  const medalRanking = computeMedalRanking(totals);
-  const medalRankingEl = document.getElementById("medalRanking");
-  if (medalRankingEl) {
-    medalRankingEl.innerHTML = renderMedalRanking(medalRanking);
+  const currentSeason = getCurrentSeason(cfg, totals);
+  const bySeason = groupRowsBySeason(totals);
+  const currentSeasonRows = bySeason[currentSeason] || [];
+
+  const seasonMedalRanking = computeMedalRanking(currentSeasonRows);
+  const seasonMedalRankingEl = document.getElementById("seasonMedalRanking");
+  if (seasonMedalRankingEl) {
+    seasonMedalRankingEl.innerHTML = renderMedalRanking(seasonMedalRanking);
   }
 
-  const byNumero = {};
-  for (const r of totals) {
-    const n = Number(r.Numero);
-    if (!byNumero[n]) byNumero[n] = [];
-    byNumero[n].push(r);
+  const totalMedalRanking = computeMedalRanking(totals);
+  const totalMedalRankingEl = document.getElementById("totalMedalRanking");
+  if (totalMedalRankingEl) {
+    totalMedalRankingEl.innerHTML = renderMedalRanking(totalMedalRanking);
   }
 
-  const numeros = Object.keys(byNumero).map(Number).sort((a,b)=>b-a);
-  for (const n of numeros) byNumero[n].sort((a,b)=>Number(a.position)-Number(b.position));
+  const { byNumero, numeros } = groupRowsByNumero(currentSeasonRows);
 
-  const last = numeros[0];
-  document.getElementById("lastMeta").textContent =
-    `Challenge #${last} — ${byNumero[last][0].map}`;
-  document.getElementById("lastLink").href =
-    BASE_URL + (byNumero[last][0].challenge_id || "");
-  document.getElementById("lastLeaderboard").innerHTML =
-    renderLeaderboard(byNumero[last]);
+  if (numeros.length) {
+    const last = numeros[0];
+    document.getElementById("lastMeta").textContent =
+      `Saison ${currentSeason} — Challenge #${last} — ${byNumero[last][0].map}`;
+    document.getElementById("lastLink").style.display = "";
+    document.getElementById("lastLink").href =
+      BASE_URL + (byNumero[last][0].challenge_id || "");
+    document.getElementById("lastLeaderboard").innerHTML =
+      renderLeaderboard(byNumero[last]);
 
-  document.getElementById("history").innerHTML =
-    numeros.slice(1).map(n => renderHistoryBlock(n, byNumero[n])).join("");
+    document.getElementById("history").innerHTML =
+      numeros.slice(1).map(n => renderHistoryBlock(n, byNumero[n])).join("") ||
+      '<div class="muted">Pas encore d’historique pour cette saison.</div>';
+  } else {
+    document.getElementById("lastMeta").textContent = `Aucun challenge terminé pour la saison ${currentSeason}`;
+    document.getElementById("lastLink").style.display = "none";
+    document.getElementById("lastLeaderboard").innerHTML = '<div class="muted">Aucun résultat pour le moment.</div>';
+    document.getElementById("history").innerHTML = '<div class="muted">Pas encore d’historique pour cette saison.</div>';
+  }
+
+  const seasonHistoryTitle = document.getElementById("seasonHistoryTitle");
+  if (seasonHistoryTitle) {
+    seasonHistoryTitle.textContent = `Historique — Saison ${currentSeason}`;
+  }
+
+  const archivesEl = document.getElementById("archives");
+  if (archivesEl) {
+    archivesEl.classList.remove("muted");
+    archivesEl.innerHTML = renderArchives(bySeason, currentSeason);
+  }
 })();
 </script>
 </body>
