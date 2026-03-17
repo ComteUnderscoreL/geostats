@@ -1,5 +1,5 @@
 date=2026-03-17
-saison=0
+saison=0-test
 challenge_id=aRBxMOZAWlm5hL1o
 twitch_channel=comte_L
 youtube_playlist=PLHQFZFMnBYhLZmNmTBlrAg27XfiAvELdQ
