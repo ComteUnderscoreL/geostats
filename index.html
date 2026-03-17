@@ -304,7 +304,7 @@ function renderArchives(bySeason, currentSeason) {
     return '<div class="muted">Aucune archive pour le moment.</div>';
   }
 
-  return seasons.map((season, idx) => renderArchiveSeason(season, bySeason[season], idx === 0)).join("");
+  return seasons.map((season, idx) => renderArchiveSeason(season, bySeason[season], false)).join("");
 }
 
 
