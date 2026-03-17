@@ -439,6 +439,10 @@ details.archive-season summary{
   align-items:center;
   justify-content:space-between;
   gap:12px;
+  user-select:none;
+  position:relative;
+  z-index:2;
+  pointer-events:auto;
 }
 
 details.archive-season summary::-webkit-details-marker{
@@ -464,4 +468,19 @@ details.archive-season:not([open]) summary::after{
   color:var(--text-muted);
   font-weight:600;
   font-size:.85em;
+}
+details.archive-season {
+  pointer-events: auto;
+}
+
+details.archive-season summary {
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  position: relative;
+  z-index: 2;
+}
+
+details.archive-season summary::after {
+  pointer-events: none;
 }
