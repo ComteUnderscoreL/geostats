@@ -41,14 +41,12 @@
         <h3>Classement des médailles <small>— saison en cours</small></h3>
         <div id="seasonMedalRanking" class="muted">Chargement...</div>
       </section>
-
       <section class="card">
         <h3>Classement des médailles <small>— total</small></h3>
         <div id="totalMedalRanking" class="muted">Chargement...</div>
       </section>
-
       <section class="card sticky">
-        <h3>Live 7h30-8h30 Lu-Ve</h3>
+        <h3>Live :</h3>
         <div id="twitchWrap" class="embed muted">Aucun live configuré.</div>
         <h3>Mario Kart Jeudi 21h30</h3>
         <h3>Playlist Challenges No Move</h3>
@@ -91,29 +89,24 @@ async function loadText(path) {
 async function loadTSV(path) {
   const r = await fetch(path, { cache: "no-store" });
   if (!r.ok) throw new Error("Cannot load " + path);
-
-  const text = (await r.text()).trim();
-  if (!text) return [];
-
-  const lines = text.split(/\r?\n/);
+  const lines = (await r.text()).trim().split("\n");
   if (lines.length < 2) return [];
-
   const cols = lines[0].split("\t");
   return lines.slice(1).map(row => {
     const vals = row.split("\t");
     const o = {};
-    cols.forEach((c, i) => o[c] = vals[i] ?? "");
+    cols.forEach((c, i) => o[c] = vals[i]);
     return o;
   });
 }
 
 function esc(s) {
-  return String(s).replace(/[&<>"']/g, c => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
+  return String(s).replace(/[&<>\"']/g, c => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
   }[c]));
 }
 
@@ -123,7 +116,8 @@ function toScore(value) {
 }
 
 function formatScore(value) {
-  return toScore(value).toLocaleString("fr-FR");
+  const score = toScore(value);
+  return score.toLocaleString("fr-FR");
 }
 
 function getMedalName(score) {
@@ -138,9 +132,9 @@ function getMedalName(score) {
 
 function renderMedal(score) {
   const medal = getMedalName(score);
-  if (!medal) return '<span class="no-medal-spacer"></span>';
+  if (!medal) return `<span class="no-medal-spacer"></span>`;
   const src = MEDAL_PATHS[medal];
-  return `<img class="medal-icon" src="${esc(src)}" alt="${esc(medal)}" title="${esc(medal)}">`;
+  return `<img class="medal-icon" src="${src}" alt="${medal}" title="${medal}">`;
 }
 
 function renderScore(scoreRaw) {
@@ -159,12 +153,13 @@ function renderLeaderboard(rows) {
     </thead>
     <tbody>
       ${rows.slice(0, TOP_N).map(r => `
-        <tr>
-          <td>${esc(r.position)}</td>
-          <td>${esc(r.player)}</td>
-          <td class="num">${renderScore(r.total_score)}</td>
-        </tr>
-      `).join("")}
+          <tr>
+            <td>${esc(r.position)}</td>
+            <td>${esc(r.player)}</td>
+            <td class="num">${renderScore(r.total_score)}</td>
+          </tr>
+        `
+      ).join("")}
     </tbody>
   </table>`;
 }
@@ -179,6 +174,7 @@ function renderHistoryBlock(numero, rows) {
     ${renderLeaderboard(rows)}
   </article>`;
 }
+
 
 function computeMedalRanking(rows) {
   const counts = {};
@@ -230,7 +226,7 @@ function renderMedalRanking(ranking) {
     <thead>
       <tr>
         <th>Joueur</th>
-        <th class="num">Médailles</th>
+        <th class="num"></th>
       </tr>
     </thead>
     <tbody>
@@ -238,20 +234,15 @@ function renderMedalRanking(ranking) {
         <tr>
           <td class="player-name-cell">${esc(player)}</td>
           <td class="num">
-            <div class="medal-grid">
-              ${renderMedalPair("netherite", m.netherite)}
-              ${renderMedalPair("emerald", m.emerald)}
-              ${renderMedalPair("diamond", m.diamond)}
-              ${renderMedalPair("gold", m.gold)}
-              ${renderMedalPair("iron", m.iron)}
-              ${renderMedalPair("copper", m.copper)}
-            </div>
+            <div class="medal-grid">${renderMedalPair("netherite", m.netherite)}${renderMedalPair("emerald", m.emerald)}${renderMedalPair("diamond", m.diamond)}${renderMedalPair("gold", m.gold)}${renderMedalPair("iron", m.iron)}${renderMedalPair("copper", m.copper)}</div>
           </td>
         </tr>
       `).join("")}
     </tbody>
   </table>`;
 }
+
+
 
 function getCurrentSeason(cfg, totals) {
   const fromCfg = Number(cfg.saison);
@@ -279,10 +270,12 @@ function groupRowsByNumero(rows) {
     if (!out[n]) out[n] = [];
     out[n].push(r);
   }
+
   const numeros = Object.keys(out).map(Number).sort((a,b)=>b-a);
   for (const n of numeros) {
     out[n].sort((a,b)=>Number(a.position)-Number(b.position));
   }
+
   return { byNumero: out, numeros };
 }
 
@@ -313,6 +306,7 @@ function renderArchives(bySeason, currentSeason) {
 
   return seasons.map((season, idx) => renderArchiveSeason(season, bySeason[season], idx === 0)).join("");
 }
+
 
 function renderTwitch(channel) {
   const parent = encodeURIComponent(location.hostname);
