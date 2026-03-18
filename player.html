@@ -532,7 +532,7 @@ function renderSummary(rows, currentSeason, roundRows) {
   const total5k = computeTotal5K(roundRows);
 
   const stats = [
-    ["Streak", `${streak.current} (${streak.max})`, streakClass(streak.current)],
+    ["Streak (max)", `${streak.current} (${streak.max})`, streakClass(streak.current)],
     ["Participations", scores.length, ""],
     ["Saisons", seasons.length, ""],
     ["5K", total5k, ""],
