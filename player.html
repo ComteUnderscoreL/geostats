@@ -464,48 +464,75 @@ function mapStatsRows(rows) {
 }
 
 
-function computeStreaks(rows) {
-  const sorted = [...rows]
-    .map(r => ({ saison: Number(r.saison), numero: Number(r.Numero) }))
+function computeStreaks(playerRows, allTotals, currentSeason) {
+  const seasonMax = {};
+  for (const r of allTotals) {
+    const s = Number(r.saison);
+    const n = Number(r.Numero);
+    if (!Number.isFinite(s) || !Number.isFinite(n)) continue;
+    if (!(s in seasonMax) || n > seasonMax[s]) seasonMax[s] = n;
+  }
+
+  const allRows = playerRows
+    .map(r => ({
+      saison: Number(r.saison),
+      numero: Number(r.Numero)
+    }))
     .filter(r => Number.isFinite(r.saison) && Number.isFinite(r.numero))
-    .sort((a,b) => a.saison - b.saison || a.numero - b.numero);
+    .sort((a, b) => a.saison - b.saison || a.numero - b.numero);
 
-  if (!sorted.length) return { current: 0, max: 0 };
+  if (!allRows.length) return { current: 0, max: 0 };
 
-  let currentRun = 0;
-  let maxRun = 0;
+  function isConsecutive(prev, curr) {
+    if (!prev || !curr) return false;
+    if (curr.saison === prev.saison && curr.numero === prev.numero + 1) return true;
+    if (
+      curr.saison === prev.saison + 1 &&
+      curr.numero === 1 &&
+      seasonMax[prev.saison] === prev.numero
+    ) return true;
+    return false;
+  }
+
+  let max = 0;
+  let run = 0;
   let prev = null;
 
-  for (const item of sorted) {
-    const consecutive = prev &&
-      item.saison === prev.saison &&
-      item.numero === prev.numero + 1;
-
-    if (consecutive) {
-      currentRun += 1;
+  for (const item of allRows) {
+    if (isConsecutive(prev, item)) {
+      run++;
     } else {
-      currentRun = 1;
+      run = 1;
     }
-
-    if (currentRun > maxRun) maxRun = currentRun;
+    if (run > max) max = run;
     prev = item;
   }
 
-  const lastSeason = sorted[sorted.length - 1].saison;
-  const lastNumero = sorted[sorted.length - 1].numero;
+  const allCurrentSeasonNumeros = allTotals
+    .filter(r => Number(r.saison) === currentSeason)
+    .map(r => Number(r.Numero))
+    .filter(Number.isFinite);
 
-  let current = 1;
-  for (let i = sorted.length - 2; i >= 0; i--) {
-    const a = sorted[i];
-    const b = sorted[i + 1];
-    if (a.saison === b.saison && a.numero === b.numero - 1 && b.saison === lastSeason) {
-      current += 1;
-    } else {
-      break;
+  if (!allCurrentSeasonNumeros.length) {
+    return { current: 0, max };
+  }
+
+  const lastChallenge = { saison: currentSeason, numero: Math.max(...allCurrentSeasonNumeros) };
+  const lastPlayed = allRows[allRows.length - 1];
+
+  let current = 0;
+  if (lastPlayed.saison === lastChallenge.saison && lastPlayed.numero === lastChallenge.numero) {
+    current = 1;
+    for (let i = allRows.length - 2; i >= 0; i--) {
+      if (isConsecutive(allRows[i], allRows[i + 1])) {
+        current++;
+      } else {
+        break;
+      }
     }
   }
 
-  return { current, max: maxRun, lastSeason, lastNumero };
+  return { current, max };
 }
 
 function computeTotal5K(roundRows) {
@@ -516,8 +543,8 @@ function computeTotal5K(roundRows) {
 }
 
 function streakClass(n) {
-  if (n >= 50) return "streak-good";
-  if (n >= 10) return "streak-mid";
+  if (n >= 20) return "streak-good";
+  if (n >= 8) return "streak-mid";
   return "streak-low";
 }
 
@@ -528,7 +555,7 @@ function renderSummary(rows, currentSeason, roundRows) {
   const currentRows = rows.filter(r => Number(r.saison) === currentSeason);
   const currentScores = currentRows.map(r => num(r.total_score));
 
-  const streak = computeStreaks(rows);
+  const streak = computeStreaks(rows, totalRows, currentSeason);
   const total5k = computeTotal5K(roundRows);
 
   const stats = [
