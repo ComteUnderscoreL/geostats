@@ -496,3 +496,15 @@ details.archive-season summary::after {
 .player-name-cell a:hover {
   color: #ffffff;
 }
+
+
+/* Player links styling (override) */
+.player-name-cell a {
+  color: var(--text-soft) !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease;
+}
+
+.player-name-cell a:hover {
+  color: #ffffff !important;
+}
