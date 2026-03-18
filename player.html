@@ -111,7 +111,7 @@
     border:1px solid rgba(255,255,255,.08);
   }
 
-  .stats-grid{
+   .stats-grid{
     display:grid;
     grid-template-columns:repeat(5, minmax(0, 1fr));
     gap:12px;
@@ -227,7 +227,7 @@
 
   @media (max-width: 1080px){
     .layout{ grid-template-columns:1fr; }
-    .stats-grid{
+     .stats-grid{
     display:grid;
     grid-template-columns:repeat(5, minmax(0, 1fr));
     gap:12px;
@@ -237,7 +237,7 @@
   @media (max-width: 680px){
     .wrap{ padding:18px 12px 28px; }
     .card{ padding:14px; }
-    .stats-grid{
+     .stats-grid{
     display:grid;
     grid-template-columns:repeat(5, minmax(0, 1fr));
     gap:12px;
@@ -544,16 +544,16 @@ function renderSummary(rows, currentSeason, roundRows) {
   const total5k = computeTotal5K(roundRows);
 
   const stats = [
+    ["Streak", `${streak.current} (${streak.max})`, streakClass(streak.current)],
     ["Participations", scores.length, ""],
     ["Saisons", seasons.length, ""],
+    ["5K", total5k, ""],
     ["Meilleur score", scores.length ? formatScore(Math.max(...scores)) : "—", ""],
     ["Moyenne", scores.length ? formatScore(Math.round(average(scores))) : "—", ""],
     ["Médiane", scores.length ? formatScore(Math.round(median(scores))) : "—", ""],
     ["Meilleur score saison courante", currentScores.length ? formatScore(Math.max(...currentScores)) : "—", ""],
     ["Moyenne saison courante", currentScores.length ? formatScore(Math.round(average(currentScores))) : "—", ""],
-    ["Médiane saison courante", currentScores.length ? formatScore(Math.round(median(currentScores))) : "—", ""],
-    ["Streak", `${streak.current} (${streak.max})`, streakClass(streak.current)],
-    ["5K", total5k, ""]
+    ["Médiane saison courante", currentScores.length ? formatScore(Math.round(median(currentScores))) : "—", ""]
   ];
 
   return stats.map(([label, value, extraClass]) => `
