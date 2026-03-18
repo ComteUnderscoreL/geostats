@@ -508,3 +508,13 @@ details.archive-season summary::after {
 .player-name-cell a:hover {
   color: #ffffff !important;
 }
+
+table td a {
+  color: var(--text-soft) !important;
+  text-decoration: none !important;
+  transition: color 0.15s ease;
+}
+
+table td a:hover {
+  color: #ffffff !important;
+}
