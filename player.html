@@ -233,7 +233,20 @@
     th, td{ padding:8px 8px; font-size:.92rem; }
     .medal-large-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
   }
-  </style>
+  
+  .stat-value.streak-good{
+    color:#7ee787;
+  }
+
+  .stat-value.streak-mid{
+    color:#ffd866;
+  }
+
+  .stat-value.streak-low{
+    color:#ff9d7a;
+  }
+
+</style>
 </head>
 <body>
 <main class="wrap">
@@ -450,27 +463,91 @@ function mapStatsRows(rows) {
   }).sort((a,b) => (b.best ?? -Infinity) - (a.best ?? -Infinity) || a.map.localeCompare(b.map));
 }
 
-function renderSummary(rows, currentSeason) {
+
+function computeStreaks(rows) {
+  const sorted = [...rows]
+    .map(r => ({ saison: Number(r.saison), numero: Number(r.Numero) }))
+    .filter(r => Number.isFinite(r.saison) && Number.isFinite(r.numero))
+    .sort((a,b) => a.saison - b.saison || a.numero - b.numero);
+
+  if (!sorted.length) return { current: 0, max: 0 };
+
+  let currentRun = 0;
+  let maxRun = 0;
+  let prev = null;
+
+  for (const item of sorted) {
+    const consecutive = prev &&
+      item.saison === prev.saison &&
+      item.numero === prev.numero + 1;
+
+    if (consecutive) {
+      currentRun += 1;
+    } else {
+      currentRun = 1;
+    }
+
+    if (currentRun > maxRun) maxRun = currentRun;
+    prev = item;
+  }
+
+  const lastSeason = sorted[sorted.length - 1].saison;
+  const lastNumero = sorted[sorted.length - 1].numero;
+
+  let current = 1;
+  for (let i = sorted.length - 2; i >= 0; i--) {
+    const a = sorted[i];
+    const b = sorted[i + 1];
+    if (a.saison === b.saison && a.numero === b.numero - 1 && b.saison === lastSeason) {
+      current += 1;
+    } else {
+      break;
+    }
+  }
+
+  return { current, max: maxRun, lastSeason, lastNumero };
+}
+
+function computeTotal5K(roundRows) {
+  return roundRows.filter(r => {
+    const d = Number(r.distance);
+    return Number.isFinite(d) && d <= 0.185;
+  }).length;
+}
+
+function streakClass(n) {
+  if (n >= 20) return "streak-good";
+  if (n >= 8) return "streak-mid";
+  return "streak-low";
+}
+
+
+function renderSummary(rows, currentSeason, roundRows) {
   const scores = rows.map(r => num(r.total_score));
   const seasons = [...new Set(rows.map(r => String(r.saison)))];
   const currentRows = rows.filter(r => Number(r.saison) === currentSeason);
   const currentScores = currentRows.map(r => num(r.total_score));
 
+  const streak = computeStreaks(rows);
+  const total5k = computeTotal5K(roundRows);
+
   const stats = [
-    ["Participations", scores.length],
-    ["Saisons", seasons.length],
-    ["Meilleur score", scores.length ? formatScore(Math.max(...scores)) : "—"],
-    ["Moyenne", scores.length ? formatScore(Math.round(average(scores))) : "—"],
-    ["Médiane", scores.length ? formatScore(Math.round(median(scores))) : "—"],
-    ["Meilleur score saison courante", currentScores.length ? formatScore(Math.max(...currentScores)) : "—"],
-    ["Moyenne saison courante", currentScores.length ? formatScore(Math.round(average(currentScores))) : "—"],
-    ["Médiane saison courante", currentScores.length ? formatScore(Math.round(median(currentScores))) : "—"]
+    ["Participations", scores.length, ""],
+    ["Saisons", seasons.length, ""],
+    ["Meilleur score", scores.length ? formatScore(Math.max(...scores)) : "—", ""],
+    ["Moyenne", scores.length ? formatScore(Math.round(average(scores))) : "—", ""],
+    ["Médiane", scores.length ? formatScore(Math.round(median(scores))) : "—", ""],
+    ["Meilleur score saison courante", currentScores.length ? formatScore(Math.max(...currentScores)) : "—", ""],
+    ["Moyenne saison courante", currentScores.length ? formatScore(Math.round(average(currentScores))) : "—", ""],
+    ["Médiane saison courante", currentScores.length ? formatScore(Math.round(median(currentScores))) : "—", ""],
+    ["Streak", `${streak.current} (${streak.max})`, streakClass(streak.current)],
+    ["Total 5K", total5k, ""]
   ];
 
-  return stats.map(([label, value]) => `
+  return stats.map(([label, value, extraClass]) => `
     <div class="stat">
       <div class="stat-label">${esc(label)}</div>
-      <div class="stat-value">${esc(value)}</div>
+      <div class="stat-value ${esc(extraClass || "")}">${esc(value)}</div>
     </div>
   `).join("");
 }
@@ -658,7 +735,7 @@ function renderMapStats(rows) {
   document.getElementById("playerSubtitle").textContent =
     `${totalRows.length} challenge(s) enregistré(s) · saison courante : ${currentSeason}`;
 
-  document.getElementById("summaryStats").innerHTML = renderSummary(totalRows, currentSeason);
+  document.getElementById("summaryStats").innerHTML = renderSummary(totalRows, currentSeason, roundRows);
   document.getElementById("totalMedals").innerHTML = renderLargeMedals(medalCounts(totalRows));
   document.getElementById("seasonMedals").innerHTML = renderSeasonMedals(totalRows, currentSeason);
   document.getElementById("seasonScores").innerHTML = renderSeasonScores(totalRows, currentSeason);
