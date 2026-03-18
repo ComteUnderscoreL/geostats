@@ -484,3 +484,15 @@ details.archive-season summary {
 details.archive-season summary::after {
   pointer-events: none;
 }
+
+
+/* Player links styling */
+.player-name-cell a {
+  text-decoration: none;
+  color: var(--text-soft);
+  transition: color 0.15s ease;
+}
+
+.player-name-cell a:hover {
+  color: #ffffff;
+}
