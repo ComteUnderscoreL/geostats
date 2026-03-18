@@ -351,7 +351,7 @@ function average(values) {
 function getMedalName(score) {
   const s = num(score);
   if (s >= 24000) return "netherite";
-  if (s >= 23000) return "emerald";
+  if (s >= 23000) return "Emerald";
   if (s >= 22000) return "diamond";
   if (s >= 20000) return "gold";
   if (s >= 18000) return "iron";
@@ -364,7 +364,7 @@ function empty(msg) {
 }
 
 function medalCounts(rows) {
-  const out = { netherite:0, emerald:0, diamond:0, gold:0, iron:0, copper:0 };
+  const out = { netherite:0, Emerald:0, diamond:0, gold:0, iron:0, copper:0 };
   for (const r of rows) {
     const medal = getMedalName(r.total_score);
     if (medal) out[medal]++;
