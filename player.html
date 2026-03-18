@@ -589,10 +589,13 @@ function renderMapStats(rows) {
   const playerParam = params.get("player") || "";
   const playerIdParam = params.get("player_id") || "";
 
-  document.getElementById("playerParams").innerHTML = `
-    <div class="muted">player = <code>${esc(playerParam || "—")}</code></div>
-    <div class="muted">player_id = <code>${esc(playerIdParam || "—")}</code></div>
-  `;
+  const playerParamsEl = document.getElementById("playerParams");
+  if (playerParamsEl) {
+    playerParamsEl.innerHTML = `
+      <div class="muted">player = <code>${esc(playerParam || "—")}</code></div>
+      <div class="muted">player_id = <code>${esc(playerIdParam || "—")}</code></div>
+    `;
+  }
 
   if (!playerParam && !playerIdParam) {
     document.getElementById("pageTitle").textContent = "Stats joueur";
