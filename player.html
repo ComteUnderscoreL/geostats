@@ -264,7 +264,7 @@
 
       <section class="card">
         <h2>Scores par saison</h2>
-        <div class="section-note">Saison courante en haut, anciennes saisons juste en dessous.</div>
+        <div class="section-note"></div>
         <div id="seasonScores"></div>
       </section>
 
@@ -537,11 +537,16 @@ function countryCodeToFlag(code) {
   return [...cc].map(c => String.fromCodePoint(127397 + c.charCodeAt(0))).join("");
 }
 
-const COUNTRY_NAMES = {
-  FR: "France", JP: "Japon", US: "USA", GB: "Royaume-Uni", BR: "Brésil",
-  CA: "Canada", ES: "Espagne", IT: "Italie", DE: "Allemagne",
-  AU: "Australie", NZ: "Nouvelle-Zélande"
-};
+
+function countryLabel(code){
+  try {
+    const dn = new Intl.DisplayNames(['fr'], { type: 'region' });
+    return dn.of(code.toUpperCase()) || code;
+  } catch {
+    return code;
+  }
+}
+
 
 function countryLabel(code){
   const cc = String(code || "").toUpperCase();
