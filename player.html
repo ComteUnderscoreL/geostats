@@ -286,12 +286,12 @@
 
 <script>
 const MEDAL_PATHS = {
-  netherite: "medal/netherite.svg",
-  emerald: "medal/emerald.svg",
-  diamond: "medal/diamond.svg",
-  gold: "medal/gold.svg",
-  iron: "medal/iron.svg",
-  copper: "medal/copper.svg"
+  Netherite: "medal/netherite.svg",
+  Emerald: "medal/emerald.svg",
+  Diamond: "medal/diamond.svg",
+  Gold: "medal/gold.svg",
+  Iron: "medal/iron.svg",
+  Copper: "medal/copper.svg"
 };
 
 function esc(s) {
@@ -530,6 +530,13 @@ function renderSeasonScores(rows, currentSeason) {
   </table>`;
 }
 
+
+function countryCodeToFlag(code) {
+  const cc = String(code || "").trim().toUpperCase();
+  if (!/^[A-Z]{2}$/.test(cc)) return "";
+  return [...cc].map(c => String.fromCodePoint(127397 + c.charCodeAt(0))).join("");
+}
+
 function renderCountryStats(rows) {
   const items = countryStatsRows(rows);
   if (!items.length) return empty("Aucune donnée pays.");
@@ -546,7 +553,7 @@ function renderCountryStats(rows) {
     <tbody>
       ${items.map(r => `
         <tr>
-          <td>${esc(r.country)}</td>
+          <td>${esc(countryCodeToFlag(r.country))} ${esc(r.country)}</td>
           <td class="num">${esc(formatDistance(r.min))}</td>
           <td class="num">${esc(formatDistance(r.median))}</td>
           
