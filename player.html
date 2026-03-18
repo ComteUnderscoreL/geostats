@@ -111,11 +111,7 @@
     border:1px solid rgba(255,255,255,.08);
   }
 
-   .stats-grid{
-    display:grid;
-    grid-template-columns:repeat(5, minmax(0, 1fr));
-    gap:12px;
-  }
+  .stats-grid{
     display:grid;
     grid-template-columns:repeat(4, minmax(0, 1fr));
     gap:12px;
@@ -227,21 +223,13 @@
 
   @media (max-width: 1080px){
     .layout{ grid-template-columns:1fr; }
-     .stats-grid{
-    display:grid;
-    grid-template-columns:repeat(5, minmax(0, 1fr));
-    gap:12px;
-  } grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    .stats-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
   }
 
   @media (max-width: 680px){
     .wrap{ padding:18px 12px 28px; }
     .card{ padding:14px; }
-     .stats-grid{
-    display:grid;
-    grid-template-columns:repeat(5, minmax(0, 1fr));
-    gap:12px;
-  } grid-template-columns:1fr; }
+    .stats-grid{ grid-template-columns:1fr; }
     th, td{ padding:8px 8px; font-size:.92rem; }
     .medal-large-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
   }
@@ -549,6 +537,7 @@ function renderSummary(rows, currentSeason, roundRows) {
     ["Saisons", seasons.length, ""],
     ["5K", total5k, ""],
     ["Meilleur score", scores.length ? formatScore(Math.max(...scores)) : "—", ""],
+
     ["Moyenne", scores.length ? formatScore(Math.round(average(scores))) : "—", ""],
     ["Médiane", scores.length ? formatScore(Math.round(median(scores))) : "—", ""],
     ["Meilleur score saison courante", currentScores.length ? formatScore(Math.max(...currentScores)) : "—", ""],
