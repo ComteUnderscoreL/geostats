@@ -144,6 +144,14 @@ function renderScore(scoreRaw) {
   return `<div class="score-cell">${renderMedal(score)}<span class="score-value">${esc(formatScore(score))}</span></div>`;
 }
 
+
+function renderPlayerLink(player, playerId = "") {
+  const href = playerId
+    ? `player.html?player_id=${encodeURIComponent(playerId)}`
+    : `player.html?player=${encodeURIComponent(player)}`;
+  return `<a href="${href}">${esc(player)}</a>`;
+}
+
 function renderLeaderboard(rows) {
   return `<table>
     <thead>
@@ -157,7 +165,7 @@ function renderLeaderboard(rows) {
       ${rows.slice(0, TOP_N).map(r => `
           <tr>
             <td>${esc(r.position)}</td>
-            <td>${esc(r.player)}</td>
+            <td>${renderPlayerLink(r.player, r.player_id || "")}</td>
             <td class="num">${renderScore(r.total_score)}</td>
           </tr>
         `
@@ -190,6 +198,7 @@ function computeMedalRanking(rows) {
 
     if (!counts[player]) {
       counts[player] = {
+        player_id: String(r.player_id || ""),
         netherite: 0,
         emerald: 0,
         diamond: 0,
@@ -234,7 +243,7 @@ function renderMedalRanking(ranking) {
     <tbody>
       ${ranking.map(([player, m]) => `
         <tr>
-          <td class="player-name-cell">${esc(player)}</td>
+          <td class="player-name-cell">${renderPlayerLink(player, m.player_id || "")}</td>
           <td class="num">
             <div class="medal-grid">${renderMedalPair("netherite", m.netherite)}${renderMedalPair("emerald", m.emerald)}${renderMedalPair("diamond", m.diamond)}${renderMedalPair("gold", m.gold)}${renderMedalPair("iron", m.iron)}${renderMedalPair("copper", m.copper)}</div>
           </td>
