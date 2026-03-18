@@ -113,6 +113,10 @@
 
   .stats-grid{
     display:grid;
+    grid-template-columns:repeat(5, minmax(0, 1fr));
+    gap:12px;
+  }
+    display:grid;
     grid-template-columns:repeat(4, minmax(0, 1fr));
     gap:12px;
   }
@@ -223,13 +227,21 @@
 
   @media (max-width: 1080px){
     .layout{ grid-template-columns:1fr; }
-    .stats-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    .stats-grid{
+    display:grid;
+    grid-template-columns:repeat(5, minmax(0, 1fr));
+    gap:12px;
+  } grid-template-columns:repeat(2, minmax(0, 1fr)); }
   }
 
   @media (max-width: 680px){
     .wrap{ padding:18px 12px 28px; }
     .card{ padding:14px; }
-    .stats-grid{ grid-template-columns:1fr; }
+    .stats-grid{
+    display:grid;
+    grid-template-columns:repeat(5, minmax(0, 1fr));
+    gap:12px;
+  } grid-template-columns:1fr; }
     th, td{ padding:8px 8px; font-size:.92rem; }
     .medal-large-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
   }
@@ -541,7 +553,7 @@ function renderSummary(rows, currentSeason, roundRows) {
     ["Moyenne saison courante", currentScores.length ? formatScore(Math.round(average(currentScores))) : "—", ""],
     ["Médiane saison courante", currentScores.length ? formatScore(Math.round(median(currentScores))) : "—", ""],
     ["Streak", `${streak.current} (${streak.max})`, streakClass(streak.current)],
-    ["Total 5K", total5k, ""]
+    ["5K", total5k, ""]
   ];
 
   return stats.map(([label, value, extraClass]) => `
