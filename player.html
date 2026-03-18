@@ -549,13 +549,13 @@ function streakClass(n) {
 }
 
 
-function renderSummary(rows, currentSeason, roundRows) {
+function renderSummary(rows, currentSeason, roundRows, allTotals) {
   const scores = rows.map(r => num(r.total_score));
   const seasons = [...new Set(rows.map(r => String(r.saison)))];
   const currentRows = rows.filter(r => Number(r.saison) === currentSeason);
   const currentScores = currentRows.map(r => num(r.total_score));
 
-  const streak = computeStreaks(rows, totals, currentSeason);
+  const streak = computeStreaks(rows, allTotals, currentSeason);
   const total5k = computeTotal5K(roundRows);
 
   const stats = [
@@ -762,7 +762,7 @@ function renderMapStats(rows) {
   document.getElementById("playerSubtitle").textContent =
     `${totalRows.length} challenge(s) enregistré(s) · saison courante : ${currentSeason}`;
 
-  document.getElementById("summaryStats").innerHTML = renderSummary(rows, currentSeason, roundRows);
+  document.getElementById("summaryStats").innerHTML = renderSummary(totalRows, currentSeason, roundRows, totals);
   document.getElementById("totalMedals").innerHTML = renderLargeMedals(medalCounts(totalRows));
   document.getElementById("seasonMedals").innerHTML = renderSeasonMedals(totalRows, currentSeason);
   document.getElementById("seasonScores").innerHTML = renderSeasonScores(totalRows, currentSeason);
