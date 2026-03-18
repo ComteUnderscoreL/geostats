@@ -423,8 +423,10 @@ function countryStatsRows(rows) {
   const byCountry = groupBy(rows.filter(r => r.country_code), r => r.country_code);
   return Object.keys(byCountry).map(country => {
     const vals = byCountry[country].map(r => Number(r.distance)).filter(Number.isFinite);
+    const fivek = vals.filter(v => v <= 0.185).length;
     return {
       country,
+      fivek,
       min: vals.length ? Math.min(...vals) : null,
       median: median(vals),
       max: vals.length ? Math.max(...vals) : null,
@@ -540,10 +542,11 @@ function countryCodeToFlag(code) {
 
 function countryLabel(code){
   try {
+    const cc = String(code || "").trim().toUpperCase();
     const dn = new Intl.DisplayNames(['fr'], { type: 'region' });
-    return dn.of(code.toUpperCase()) || code;
+    return dn.of(cc) || cc;
   } catch {
-    return code;
+    return String(code || "").trim().toUpperCase();
   }
 }
 
@@ -560,6 +563,7 @@ function renderCountryStats(rows) {
     <thead>
       <tr>
         <th>Pays</th>
+        <th class="num">5k</th>
         <th class="num">Min</th>
         <th class="num">Médiane</th>
         
@@ -570,6 +574,7 @@ function renderCountryStats(rows) {
       ${items.map(r => `
         <tr>
           <td>${esc(countryCodeToFlag(r.country))} ${esc(countryLabel(r.country))}</td>
+          <td class="num">${esc(r.fivek)}</td>
           <td class="num">${esc(formatDistance(r.min))}</td>
           <td class="num">${esc(formatDistance(r.median))}</td>
           
