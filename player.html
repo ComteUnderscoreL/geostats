@@ -286,12 +286,12 @@
 
 <script>
 const MEDAL_PATHS = {
-  Netherite: "medal/netherite.svg",
-  Emerald: "medal/emerald.svg",
-  Diamond: "medal/diamond.svg",
-  Gold: "medal/gold.svg",
-  Iron: "medal/iron.svg",
-  Copper: "medal/copper.svg"
+  netherite: "medal/netherite.svg",
+  emerald: "medal/emerald.svg",
+  diamond: "medal/diamond.svg",
+  gold: "medal/gold.svg",
+  iron: "medal/iron.svg",
+  copper: "medal/copper.svg"
 };
 
 function esc(s) {
@@ -351,7 +351,7 @@ function average(values) {
 function getMedalName(score) {
   const s = num(score);
   if (s >= 24000) return "netherite";
-  if (s >= 23000) return "Emerald";
+  if (s >= 23000) return "emerald";
   if (s >= 22000) return "diamond";
   if (s >= 20000) return "gold";
   if (s >= 18000) return "iron";
@@ -364,7 +364,7 @@ function empty(msg) {
 }
 
 function medalCounts(rows) {
-  const out = { netherite:0, Emerald:0, diamond:0, gold:0, iron:0, copper:0 };
+  const out = { netherite:0, emerald:0, diamond:0, gold:0, iron:0, copper:0 };
   for (const r of rows) {
     const medal = getMedalName(r.total_score);
     if (medal) out[medal]++;
@@ -373,15 +373,15 @@ function medalCounts(rows) {
 }
 
 function renderMedalPair(name, count) {
-  return `<span class="medal-pair"><img src="${esc(MEDAL_PATHS[name])}" alt="${esc(name)}"><span>${esc(count)}</span></span>`;
+  return `<span class="medal-pair"><img src="${esc(MEDAL_PATHS[name])}" alt="${esc(name.charAt(0).toUpperCase()+name.slice(1))}"><span>${esc(count)}</span></span>`;
 }
 
 function renderLargeMedals(counts) {
   return `<div class="medal-large-grid">
     ${Object.keys(MEDAL_PATHS).map(name => `
       <div class="medal-large">
-        <img src="${esc(MEDAL_PATHS[name])}" alt="${esc(name)}">
-        <span>${esc(name)}</span>
+        <img src="${esc(MEDAL_PATHS[name])}" alt="${esc(name.charAt(0).toUpperCase()+name.slice(1))}">
+        <span>${esc(name.charAt(0).toUpperCase()+name.slice(1))}</span>
         <strong>${esc(counts[name] ?? 0)}</strong>
       </div>
     `).join("")}
@@ -537,6 +537,17 @@ function countryCodeToFlag(code) {
   return [...cc].map(c => String.fromCodePoint(127397 + c.charCodeAt(0))).join("");
 }
 
+const COUNTRY_NAMES = {
+  FR: "France", JP: "Japon", US: "USA", GB: "Royaume-Uni", BR: "Brésil",
+  CA: "Canada", ES: "Espagne", IT: "Italie", DE: "Allemagne",
+  AU: "Australie", NZ: "Nouvelle-Zélande"
+};
+
+function countryLabel(code){
+  const cc = String(code || "").toUpperCase();
+  return (COUNTRY_NAMES[cc] || cc);
+}
+
 function renderCountryStats(rows) {
   const items = countryStatsRows(rows);
   if (!items.length) return empty("Aucune donnée pays.");
@@ -553,7 +564,7 @@ function renderCountryStats(rows) {
     <tbody>
       ${items.map(r => `
         <tr>
-          <td>${esc(countryCodeToFlag(r.country))} ${esc(r.country)}</td>
+          <td>${esc(countryCodeToFlag(r.country))} ${esc(countryLabel(r.country))}</td>
           <td class="num">${esc(formatDistance(r.min))}</td>
           <td class="num">${esc(formatDistance(r.median))}</td>
           
