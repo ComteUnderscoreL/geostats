@@ -165,11 +165,10 @@
   td.center, th.center{ text-align:center; }
 
   .medal-grid{
-    display:grid;
-    grid-template-columns:repeat(3, minmax(46px, max-content));
-    gap:6px 10px;
-    justify-content:start;
+    display:flex;
+    gap:10px;
     align-items:center;
+    flex-wrap:nowrap;
   }
 
   .medal-pair{
@@ -188,9 +187,9 @@
   }
 
   .medal-large-grid{
-    display:grid;
-    grid-template-columns:repeat(3, minmax(84px, max-content));
-    gap:10px 14px;
+    display:flex;
+    gap:14px;
+    flex-wrap:nowrap;
   }
 
   .medal-large{
@@ -281,13 +280,7 @@
       </section>
     </div>
 
-    <aside class="sidebar">
-      <section class="card">
-        <h3>Paramètres joueur</h3>
-        <div class="muted">Cette page lit <code>data/totals.tsv</code> et <code>data/rounds.tsv</code>.</div>
-        <div style="margin-top:10px" id="playerParams"></div>
-      </section>
-    </aside>
+    
   </div>
 </main>
 
@@ -546,7 +539,7 @@ function renderCountryStats(rows) {
         <th>Pays</th>
         <th class="num">Min</th>
         <th class="num">Médiane</th>
-        <th class="num">Pire</th>
+        
         <th class="num">Rounds</th>
       </tr>
     </thead>
@@ -556,7 +549,7 @@ function renderCountryStats(rows) {
           <td>${esc(r.country)}</td>
           <td class="num">${esc(formatDistance(r.min))}</td>
           <td class="num">${esc(formatDistance(r.median))}</td>
-          <td class="num">${esc(formatDistance(r.max))}</td>
+          
           <td class="num">${esc(r.count)}</td>
         </tr>
       `).join("")}
@@ -574,7 +567,7 @@ function renderMapStats(rows) {
         <th class="num">Parties</th>
         <th class="num">Meilleur</th>
         <th class="num">Médiane</th>
-        <th class="num">Pire</th>
+        
       </tr>
     </thead>
     <tbody>
@@ -584,7 +577,7 @@ function renderMapStats(rows) {
           <td class="num">${esc(r.count)}</td>
           <td class="num">${esc(formatScore(r.best))}</td>
           <td class="num">${esc(formatScore(Math.round(r.median)))}</td>
-          <td class="num">${esc(formatScore(r.worst))}</td>
+          
         </tr>
       `).join("")}
     </tbody>
