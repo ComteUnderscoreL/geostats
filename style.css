@@ -408,6 +408,25 @@ table td a:hover{
   gap:4px;
 }
 
+
+.medal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 6px 12px;
+  justify-content: end;
+}
+
+.medal-pair {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* number on the left */
+.medal-pair span {
+  order: -1;
+  font-variant-numeric: tabular-nums;
+}
 .medal-pair span{
   text-align:left !important;
   font-variant-numeric: tabular-nums;
