@@ -243,33 +243,29 @@ table th.num{
   text-align:right;
 }
 
-/* Medals on index: number on the LEFT of the medal */
 .medal-grid{
   display:grid;
-  grid-template-columns:repeat(3, auto);
-  gap:6px 12px;
+  grid-template-columns: repeat(3, 56px);
+  gap:6px 10px;
   justify-content:end;
 }
 
 .medal-pair{
-  display:flex;
+  display:grid;
+  grid-template-columns: 2ch 18px; /* nombre fixe + médaille */
   align-items:center;
-  gap:4px;
-  white-space:nowrap;
-  font-variant-numeric:tabular-nums;
+  column-gap:4px;
+  justify-content:end;
 }
 
 .medal-pair span{
-  order:-1;
-  display:inline-block;
-  text-align:left;
-  font-variant-numeric:tabular-nums;
+  text-align:right; /* clé ici */
+  font-variant-numeric: tabular-nums;
 }
 
 .medal-pair img{
   width:18px;
   height:18px;
-  display:block;
 }
 
 .player-name-cell{
