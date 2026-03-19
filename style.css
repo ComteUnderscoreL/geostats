@@ -377,3 +377,15 @@ table td a:hover{
     gap:6px 8px;
   }
 }
+
+.medal-pair{
+  display:grid;
+  grid-template-columns:18px auto;
+  align-items:center;
+  column-gap:3px;
+}
+
+.medal-pair span{
+  text-align:left;
+  font-variant-numeric: tabular-nums;
+}
