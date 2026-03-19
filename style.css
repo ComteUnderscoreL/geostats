@@ -376,9 +376,26 @@ table td a:hover{
     grid-template-columns:repeat(3, 52px);
     gap:6px 8px;
   }
+}
 
 
-  .medal-pair span{
-  text-align:left !important;
-  }
+/* === MEDAL LEFT ALIGN FINAL FIX === */
+.medal-grid{
+  grid-template-columns: repeat(3, 52px) !important;
+  column-gap: 12px !important;
+}
+
+.medal-pair{
+  display: grid !important;
+  grid-template-columns: 18px auto !important;
+  justify-content: start !important;
+  column-gap: 4px !important;
+}
+
+.medal-pair span{
+  width: auto !important;
+  min-width: 0 !important;
+  display: inline-block !important;
+  text-align: left !important;
+  justify-self: start !important;
 }
