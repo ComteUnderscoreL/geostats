@@ -375,8 +375,3 @@ table td a:hover{
 .medal-pair span{
   text-align:left !important;
 }
-.medal-pair span{
-  width:100%;
-  text-align:right;
-  font-variant-numeric: tabular-nums;
-}
