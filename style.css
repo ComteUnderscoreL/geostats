@@ -399,3 +399,16 @@ table td a:hover{
   text-align: left !important;
   justify-self: start !important;
 }
+/* === MEDAL NUMBER LEFT === */
+
+.medal-pair{
+  display:flex !important;
+  flex-direction: row-reverse !important;
+  align-items:center;
+  gap:4px;
+}
+
+.medal-pair span{
+  text-align:left !important;
+  font-variant-numeric: tabular-nums;
+}
