@@ -372,6 +372,13 @@ table td a:hover{
     min-width:auto;
   }
 
-.medal-pair span{
+  .medal-grid{
+    grid-template-columns:repeat(3, 52px);
+    gap:6px 8px;
+  }
+
+
+  .medal-pair span{
   text-align:left !important;
+  }
 }
