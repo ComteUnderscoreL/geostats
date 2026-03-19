@@ -520,3 +520,22 @@ table td a {
 table td a:hover {
   color: #ffffff !important;
 }
+.medal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 56px);
+  gap: 6px 10px;
+  justify-content: end;
+}
+
+.medal-pair {
+  display: grid !important;
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  column-gap: 6px;
+}
+
+.medal-pair span {
+  width: 100%;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
