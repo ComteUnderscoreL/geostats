@@ -372,19 +372,9 @@ table td a:hover{
     min-width:auto;
   }
 
-  .medal-grid{
-    grid-template-columns:repeat(3, 52px);
-    gap:6px 8px;
-  }
+.medal-pair span{
+  text-align:left !important;
 }
-
-.medal-pair{
-  display:grid;
-  grid-template-columns:18px 1fr;
-  align-items:center;
-  column-gap:3px;
-}
-
 .medal-pair span{
   width:100%;
   text-align:right;
