@@ -380,12 +380,13 @@ table td a:hover{
 
 .medal-pair{
   display:grid;
-  grid-template-columns:18px auto;
+  grid-template-columns:18px 1fr;
   align-items:center;
   column-gap:3px;
 }
 
 .medal-pair span{
-  text-align:left;
+  width:100%;
+  text-align:right;
   font-variant-numeric: tabular-nums;
 }
