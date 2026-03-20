@@ -435,7 +435,11 @@ function seasonStatsRows(rows, currentSeason) {
 function countryStatsRows(rows) {
   const byCountry = groupBy(rows.filter(r => r.country_code), r => r.country_code);
   return Object.keys(byCountry).map(country => {
-    const vals = byCountry[country].map(r => Number(r.distance)).filter(Number.isFinite);
+    const rawRows = byCountry[country];
+    const vals = rawRows
+      .map(r => Number(String(r.distance ?? "").replace(",", ".")))
+      .filter(Number.isFinite);
+
     const fivek = vals.filter(v => v <= 0.185).length;
     return {
       country,
@@ -443,9 +447,9 @@ function countryStatsRows(rows) {
       min: vals.length ? Math.min(...vals) : null,
       median: median(vals),
       max: vals.length ? Math.max(...vals) : null,
-      count: vals.length
+      count: rawRows.length
     };
-  }).filter(r => r.count > 0)
+  }).filter(r => r.count >= 3)
     .sort((a,b) => (a.median ?? Infinity) - (b.median ?? Infinity) || a.country.localeCompare(b.country));
 }
 
