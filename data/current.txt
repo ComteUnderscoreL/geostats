@@ -3,3 +3,4 @@ saison=1
 challenge_id=ffqxIE5IxC1FYod6
 twitch_channel=comte_L
 youtube_playlist=PLHQFZFMnBYhLZmNmTBlrAg27XfiAvELdQ
+Test=0
