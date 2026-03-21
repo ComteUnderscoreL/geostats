@@ -3,301 +3,66 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Stats joueur</title>
-  <style>
-  :root{
-    --bg-main:#081120;
-    --bg-grad-1:#0b1730;
-    --bg-grad-2:#0f1f3d;
-    --bg-card:rgba(16, 27, 52, 0.92);
-    --bg-card-2:rgba(22, 36, 68, 0.95);
-    --bg-hover:rgba(36, 57, 104, 0.98);
-    --text-main:#e6eefc;
-    --text-soft:#c6d4f3;
-    --text-muted:#8ea4d6;
-    --accent:#61a8ff;
-    --accent-2:#8f7dff;
-    --border:rgba(120, 160, 255, 0.18);
-    --shadow:0 16px 48px rgba(0,0,0,.35);
-    --shadow-soft:0 8px 24px rgba(19, 58, 128, .22);
-    --table-stripe:rgba(255,255,255,.025);
-  }
-
-  * { box-sizing: border-box; }
-  html, body { margin:0; padding:0; }
-
-  body{
-    min-height:100vh;
-    background:
-      radial-gradient(circle at top left, rgba(97,168,255,.12), transparent 28%),
-      radial-gradient(circle at top right, rgba(143,125,255,.10), transparent 24%),
-      linear-gradient(180deg, var(--bg-grad-1), var(--bg-main) 35%, #060d18 100%);
-    color:var(--text-main);
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    line-height:1.45;
-  }
-
-  a{ color:var(--accent); text-decoration:none; }
-  a:hover{ text-decoration:underline; }
-
-  .wrap{
-    max-width:1400px;
-    margin:0 auto;
-    padding:28px 20px 40px;
-  }
-
-  h1{
-    margin:0 0 10px;
-    font-size:2.1rem;
-    font-weight:800;
-    letter-spacing:.01em;
-    color:#fff;
-    text-shadow:0 4px 18px rgba(97,168,255,.18);
-  }
-
-  h2,h3{
-    margin:0 0 14px;
-    color:#fff;
-    font-weight:700;
-  }
-
-  .layout{
-    display:grid;
-    grid-template-columns:minmax(0, 1fr) 360px;
-    gap:22px;
-    align-items:start;
-  }
-
-  .main{
-    display:grid;
-    gap:20px;
-  }
-
-  .sidebar{
-    display:grid;
-    gap:20px;
-  }
-
-  .card{
-    background:linear-gradient(180deg, var(--bg-card-2), var(--bg-card));
-    border:1px solid var(--border);
-    border-radius:18px;
-    box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,.04);
-    backdrop-filter: blur(10px);
-    padding:18px 18px 16px;
-  }
-
-  .muted{ color:var(--text-muted); }
-  .topline{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:16px;
-    margin-bottom:16px;
-  }
-
-  .btn{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-    min-height:40px;
-    padding:0 14px;
-    border-radius:12px;
-    color:#fff;
-    background:linear-gradient(135deg, #1e3a8a, #172554);
-    box-shadow:0 8px 24px rgba(30,58,138,.28);
-    font-weight:700;
-    border:1px solid rgba(255,255,255,.08);
-  }
-
-  .stats-grid{
-    display:grid;
-    grid-template-columns:repeat(4, minmax(0, 1fr));
-    gap:12px;
-  }
-
-  .stat{
-    background:rgba(255,255,255,.03);
-    border:1px solid rgba(255,255,255,.06);
-    border-radius:14px;
-    padding:12px;
-  }
-
-  .stat-label{
-    color:var(--text-muted);
-    font-size:.92rem;
-    margin-bottom:4px;
-  }
-
-  .stat-value{
-    color:#fff;
-    font-size:1.25rem;
-    font-weight:800;
-  }
-
-  table{
-    width:100%;
-    border-collapse:collapse;
-    overflow:hidden;
-    border-radius:14px;
-    background:rgba(255,255,255,.015);
-  }
-
-  thead th{
-    text-align:left;
-    color:#fff;
-    background:rgba(255,255,255,.04);
-    border-bottom:1px solid var(--border);
-    font-size:.94rem;
-  }
-
-  th, td{
-    padding:10px 12px;
-    border-bottom:1px solid rgba(120,160,255,.09);
-    vertical-align:middle;
-  }
-
-  tbody tr:nth-child(odd){ background:var(--table-stripe); }
-  tbody tr:hover{ background:rgba(97,168,255,.06); }
-
-  td.num, th.num{ text-align:right; }
-  td.center, th.center{ text-align:center; }
-
-  .medal-grid{
-    display:flex;
-    gap:10px;
-    align-items:center;
-    flex-wrap:nowrap;
-  }
-
-  .medal-pair{
-    display:inline-grid;
-    grid-template-columns:18px auto;
-    align-items:center;
-    column-gap:4px;
-    min-width:46px;
-    font-variant-numeric:tabular-nums;
-  }
-
-  .medal-pair img{
-    width:18px;
-    height:18px;
-    display:block;
-  }
-
-  .medal-large-grid{
-    display:flex;
-    gap:14px;
-    flex-wrap:nowrap;
-  }
-
-  .medal-large{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    background:rgba(255,255,255,.03);
-    border:1px solid rgba(255,255,255,.06);
-    border-radius:14px;
-    padding:10px 12px;
-    font-weight:700;
-  }
-
-  .medal-large img{
-    width:24px;
-    height:24px;
-    display:block;
-  }
-
-  .section-note{
-    margin-top:-6px;
-    margin-bottom:12px;
-    color:var(--text-muted);
-    font-size:.95rem;
-  }
-
-  .empty{
-    color:var(--text-muted);
-    padding:8px 0;
-  }
-
-  @media (max-width: 1080px){
-    .layout{ grid-template-columns:1fr; }
-    .stats-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
-  }
-
-  @media (max-width: 680px){
-    .wrap{ padding:18px 12px 28px; }
-    .card{ padding:14px; }
-    .stats-grid{ grid-template-columns:1fr; }
-    th, td{ padding:8px 8px; font-size:.92rem; }
-    .medal-large-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
-  }
-  
-  .stat-value.streak-good{
-    color:#7ee787;
-  }
-
-  .stat-value.streak-mid{
-    color:#ffd866;
-  }
-
-  .stat-value.streak-low{
-    color:#ff9d7a;
-  }
-
-</style>
+  <title>Stats Challenges</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 <main class="wrap">
-  <div class="topline">
-    <div>
-      <h1 id="pageTitle">Stats joueur</h1>
-      <div id="playerSubtitle" class="muted">Chargement...</div>
-    </div>
-    <a class="btn" href="index.html">← Retour au classement</a>
-  </div>
+  <h1>No Move Challenges</h1>
 
   <div class="layout">
     <div class="main">
       <section class="card">
-        <h2>Résumé</h2>
-        <div id="summaryStats" class="stats-grid"></div>
+        <h2>Challenge du jour</h2>
+        <div id="currentMeta" class="muted"></div>
+        <a id="currentLink" class="btn" target="_blank" rel="noopener">Ouvrir le challenge</a>
+        <div id="currentLeaderboard"></div>
       </section>
 
       <section class="card">
-        <h2>Médailles — total</h2>
-        <div id="totalMedals"></div>
+        <h2>Dernier challenge terminé</h2>
+        <div id="lastMeta" class="muted"></div>
+        <a id="lastLink" class="btn" target="_blank" rel="noopener">Ouvrir le challenge</a>
+        <div id="lastLeaderboard"></div>
       </section>
+    
+      <details class="card archive-season" id="currentSeasonDetails">
+       <summary><span id="seasonHistoryTitle">Historique</span></summary>
+       <div class="archive-season-content">
+         <div id="history"></div>
+      </div>
+    </details>
 
       <section class="card">
-        <h2>Médailles — par saison</h2>
-        <div id="seasonMedals"></div>
-      </section>
-
-      <section class="card">
-        <h2>Scores par saison</h2>
-        <div class="section-note"></div>
-        <div id="seasonScores"></div>
-      </section>
-
-      <section class="card">
-        <h2>Performances par pays</h2>
-        <div class="section-note">Trié du meilleur au pire selon la distance médiane.</div>
-        <div id="countryStats"></div>
-      </section>
-
-      <section class="card">
-        <h2>Performances par map</h2>
-        <div id="mapStats"></div>
+        <h2>Archives</h2>
+        <div id="archives" class="archive-list muted">Aucune archive pour le moment.</div>
       </section>
     </div>
 
-    
+    <aside class="sidebar">
+      <section class="card">
+        <h3>Classement des médailles <small>— saison en cours</small></h3>
+        <div id="seasonMedalRanking" class="muted">Chargement...</div>
+      </section>
+      <section class="card">
+        <h3>Classement des médailles <small>— total</small></h3>
+        <div id="totalMedalRanking" class="muted">Chargement...</div>
+      </section>
+      <section class="card sticky">
+        <h3>Live :</h3>
+        <div id="twitchWrap" class="embed muted">Aucun live configuré.</div>
+        <h3>Mario Kart Jeudi 21h30</h3>
+        <h3>Playlist Challenges No Move</h3>
+        <div id="ytWrap" class="embed muted">Aucune playlist configurée.</div>
+      </section>
+    </aside>
   </div>
 </main>
 
 <script>
+const BASE_URL = "https://www.geoguessr.com/challenge/";
+const TOP_N = 10;
+
 const MEDAL_PATHS = {
   netherite: "medal/netherite.svg",
   emerald: "medal/emerald.svg",
@@ -307,475 +72,373 @@ const MEDAL_PATHS = {
   copper: "medal/copper.svg"
 };
 
+function parseKV(text) {
+  const out = {};
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    const m = line.match(/^([^=]+)=(.*)$/);
+    if (m) out[m[1].trim()] = m[2].trim();
+  }
+  return out;
+}
+
+async function loadText(path) {
+  const r = await fetch(path, { cache: "no-store" });
+  if (!r.ok) return "";
+  return await r.text();
+}
+
+async function loadTSV(path) {
+  const r = await fetch(path, { cache: "no-store" });
+  if (!r.ok) throw new Error("Cannot load " + path);
+  const lines = (await r.text()).trim().split("\n");
+  if (lines.length < 2) return [];
+  const cols = lines[0].split("\t");
+  return lines.slice(1).map(row => {
+    const vals = row.split("\t");
+    const o = {};
+    cols.forEach((c, i) => o[c] = vals[i]);
+    return o;
+  });
+}
+
 function esc(s) {
-  return String(s).replace(/[&<>"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"
+  return String(s).replace(/[&<>\"']/g, c => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
   }[c]));
 }
 
-function loadTSV(path) {
-  return fetch(path, { cache: "no-store" })
-    .then(r => {
-      if (!r.ok) throw new Error("Cannot load " + path);
-      return r.text();
-    })
-    .then(text => {
-      const clean = text.trim();
-      if (!clean) return [];
-      const lines = clean.split(/\r?\n/);
-      const cols = lines[0].split("\t");
-      return lines.slice(1).map(row => {
-        const vals = row.split("\t");
-        const o = {};
-        cols.forEach((c, i) => o[c] = vals[i] ?? "");
-        return o;
-      });
-    });
-}
-
-function num(v) {
-  const n = Number(String(v).replace(/[^\d.-]/g, ""));
+function toScore(value) {
+  const n = Number(String(value).replace(/[^\d.-]/g, ""));
   return Number.isFinite(n) ? n : 0;
 }
 
-function formatScore(v) {
-  return num(v).toLocaleString("fr-FR");
-}
-
-function formatDistance(v) {
-  const n = Number(v);
-  if (!Number.isFinite(n)) return "";
-  return n.toLocaleString("fr-FR", { maximumFractionDigits: 2 }) + " km";
-}
-
-function median(values) {
-  const arr = values.map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
-  if (!arr.length) return null;
-  const mid = Math.floor(arr.length / 2);
-  return arr.length % 2 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2;
-}
-
-function average(values) {
-  const arr = values.map(Number).filter(Number.isFinite);
-  if (!arr.length) return null;
-  return arr.reduce((a,b)=>a+b,0) / arr.length;
+function formatScore(value) {
+  const score = toScore(value);
+  return score.toLocaleString("fr-FR");
 }
 
 function getMedalName(score) {
-  const s = num(score);
-  if (s >= 24000) return "netherite";
-  if (s >= 23000) return "emerald";
-  if (s >= 21000) return "diamond";
-  if (s >= 18000) return "gold";
-  if (s >= 14000) return "iron";
-  if (s >= 9000) return "copper";
+  if (score >= 24000) return "netherite";
+  if (score >= 23000) return "emerald";
+  if (score >= 21000) return "diamond";
+  if (score >= 18000) return "gold";
+  if (score >= 14000) return "iron";
+  if (score >= 9000) return "copper";
   return null;
 }
 
-function empty(msg) {
-  return `<div class="empty">${esc(msg)}</div>`;
+function renderMedal(score) {
+  const medal = getMedalName(score);
+  if (!medal) return `<span class="no-medal-spacer"></span>`;
+  const src = MEDAL_PATHS[medal];
+  return `<img class="medal-icon" src="${src}" alt="${medal}" title="${medal}">`;
 }
 
-function medalCounts(rows) {
-  const out = { netherite:0, emerald:0, diamond:0, gold:0, iron:0, copper:0 };
+function renderScore(scoreRaw) {
+  const score = toScore(scoreRaw);
+  return `<div class="score-cell">${renderMedal(score)}<span class="score-value">${esc(formatScore(score))}</span></div>`;
+}
+
+
+function renderPlayerLink(player, playerId = "") {
+  const href = playerId
+    ? `player.html?player_id=${encodeURIComponent(playerId)}`
+    : `player.html?player=${encodeURIComponent(player)}`;
+  return `<a href="${href}">${esc(player)}</a>`;
+}
+
+function renderLeaderboard(rows) {
+  return `<table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Joueur</th>
+        <th class="num">Score</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows.slice(0, TOP_N).map(r => `
+          <tr>
+            <td>${esc(r.position)}</td>
+            <td>${renderPlayerLink(r.player, r.player_id || "")}</td>
+            <td class="num">${renderScore(r.total_score)}</td>
+          </tr>
+        `
+      ).join("")}
+    </tbody>
+  </table>`;
+}
+
+function renderHistoryBlock(numero, rows) {
+  const url = rows[0].challenge_id ? BASE_URL + rows[0].challenge_id : "#";
+  return `<article class="subcard">
+    <div class="row">
+      <div class="title">#${esc(numero)} — ${esc(rows[0].map)}</div>
+      <a class="btn small" href="${esc(url)}" target="_blank" rel="noopener">Lien</a>
+    </div>
+    ${renderLeaderboard(rows)}
+  </article>`;
+}
+
+
+function computeMedalRanking(rows) {
+  const counts = {};
+
   for (const r of rows) {
-    const medal = getMedalName(r.total_score);
-    if (medal) out[medal]++;
+    const player = String(r.player || "").trim();
+    if (!player) continue;
+
+    const medal = getMedalName(toScore(r.total_score));
+    if (!medal) continue;
+
+    if (!counts[player]) {
+      counts[player] = {
+        player_id: String(r.player_id || ""),
+        netherite: 0,
+        emerald: 0,
+        diamond: 0,
+        gold: 0,
+        iron: 0,
+        copper: 0
+      };
+    }
+
+    counts[player][medal]++;
   }
-  return out;
+
+  return Object.entries(counts).sort((a, b) => {
+    const A = a[1];
+    const B = b[1];
+    return (
+      B.netherite - A.netherite ||
+      B.emerald - A.emerald ||
+      B.diamond - A.diamond ||
+      B.gold - A.gold ||
+      B.iron - A.iron ||
+      B.copper - A.copper ||
+      a[0].localeCompare(b[0], "fr", { sensitivity: "base" })
+    );
+  });
 }
 
 function renderMedalPair(name, count) {
-  return `<span class="medal-pair"><img src="${esc(MEDAL_PATHS[name])}" alt="${esc(name.charAt(0).toUpperCase()+name.slice(1))}"><span>${esc(count)}</span></span>`;
+  return `<span class="medal-pair"><img src="${esc(MEDAL_PATHS[name])}" alt="${esc(name)}" title="${esc(name)}"><span>${esc(count)}</span></span>`;
 }
 
-function renderLargeMedals(counts) {
-  return `<div class="medal-large-grid">
-    ${Object.keys(MEDAL_PATHS).map(name => `
-      <div class="medal-large">
-        <img src="${esc(MEDAL_PATHS[name])}" alt="${esc(name.charAt(0).toUpperCase()+name.slice(1))}">
-        <span>${esc(name.charAt(0).toUpperCase()+name.slice(1))}</span>
-        <strong>${esc(counts[name] ?? 0)}</strong>
-      </div>
-    `).join("")}
-  </div>`;
+function renderMedalRanking(ranking) {
+  if (!ranking.length) return '<div class="muted">Aucune médaille pour le moment.</div>';
+
+  return `<table class="medal-summary-table">
+    <thead>
+      <tr>
+        <th>Joueur</th>
+        <th class="num"></th>
+      </tr>
+    </thead>
+    <tbody>
+      ${ranking.map(([player, m]) => `
+        <tr>
+          <td class="player-name-cell">${renderPlayerLink(player, m.player_id || "")}</td>
+          <td class="num">
+            <div class="medal-grid">${renderMedalPair("netherite", m.netherite)}${renderMedalPair("emerald", m.emerald)}${renderMedalPair("diamond", m.diamond)}${renderMedalPair("gold", m.gold)}${renderMedalPair("iron", m.iron)}${renderMedalPair("copper", m.copper)}</div>
+          </td>
+        </tr>
+      `).join("")}
+    </tbody>
+  </table>`;
 }
 
-function groupBy(rows, keyFn) {
+
+
+function getCurrentSeason(cfg, totals) {
+  const fromCfg = Number(cfg.saison);
+  if (Number.isFinite(fromCfg)) return fromCfg;
+  const seasons = [...new Set(totals.map(r => Number(r.saison)).filter(Number.isFinite))];
+  return seasons.length ? Math.max(...seasons) : 0;
+}
+
+function groupRowsBySeason(rows) {
   const out = {};
-  for (const row of rows) {
-    const key = keyFn(row);
-    if (!out[key]) out[key] = [];
-    out[key].push(row);
+  for (const r of rows) {
+    const season = Number(r.saison);
+    if (!Number.isFinite(season)) continue;
+    if (!out[season]) out[season] = [];
+    out[season].push(r);
   }
   return out;
 }
 
-function seasonStatsRows(rows, currentSeason) {
-  const bySeason = groupBy(rows, r => String(r.saison));
-  return Object.keys(bySeason)
-    .map(season => {
-      const vals = bySeason[season].map(r => num(r.total_score));
-      return {
-        season: Number(season),
-        count: vals.length,
-        best: Math.max(...vals),
-        median: median(vals),
-        mean: average(vals),
-        medals: medalCounts(bySeason[season])
-      };
-    })
-    .sort((a,b) => {
-      if (a.season === currentSeason) return -1;
-      if (b.season === currentSeason) return 1;
-      return b.season - a.season;
-    });
-}
-
-function countryStatsRows(rows) {
-  const byCountry = groupBy(rows.filter(r => r.country_code), r => r.country_code);
-  return Object.keys(byCountry).map(country => {
-    const rawRows = byCountry[country];
-    const vals = rawRows
-      .map(r => Number(String(r.distance ?? "").replace(",", ".")))
-      .filter(Number.isFinite);
-
-    const fivek = vals.filter(v => v <= 0.185).length;
-    return {
-      country,
-      fivek,
-      min: vals.length ? Math.min(...vals) : null,
-      median: median(vals),
-      max: vals.length ? Math.max(...vals) : null,
-      count: rawRows.length
-    };
-  }).filter(r => r.count >= 3)
-    .sort((a,b) => (a.median ?? Infinity) - (b.median ?? Infinity) || a.country.localeCompare(b.country));
-}
-
-function mapStatsRows(rows) {
-  const byMap = groupBy(rows.filter(r => r.map), r => r.map);
-  return Object.keys(byMap).map(map => {
-    const vals = byMap[map].map(r => num(r.total_score));
-    return {
-      map,
-      best: vals.length ? Math.max(...vals) : null,
-      median: median(vals),
-      worst: vals.length ? Math.min(...vals) : null,
-      count: vals.length
-    };
-  }).sort((a,b) => (b.best ?? -Infinity) - (a.best ?? -Infinity) || a.map.localeCompare(b.map));
-}
-
-
-function computeStreaks(playerRows, allTotals, currentSeason) {
-  const seasonMax = {};
-  for (const r of allTotals) {
-    const s = Number(r.saison);
+function groupRowsByNumero(rows) {
+  const out = {};
+  for (const r of rows) {
     const n = Number(r.Numero);
-    if (!Number.isFinite(s) || !Number.isFinite(n)) continue;
-    if (!(s in seasonMax) || n > seasonMax[s]) seasonMax[s] = n;
+    if (!Number.isFinite(n)) continue;
+    if (!out[n]) out[n] = [];
+    out[n].push(r);
   }
 
-  const allRows = playerRows
-    .map(r => ({
-      saison: Number(r.saison),
-      numero: Number(r.Numero)
-    }))
-    .filter(r => Number.isFinite(r.saison) && Number.isFinite(r.numero))
-    .sort((a, b) => a.saison - b.saison || a.numero - b.numero);
-
-  if (!allRows.length) return { current: 0, max: 0 };
-
-  function isConsecutive(prev, curr) {
-    if (!prev || !curr) return false;
-    if (curr.saison === prev.saison && curr.numero === prev.numero + 1) return true;
-    if (
-      curr.saison === prev.saison + 1 &&
-      curr.numero === 1 &&
-      seasonMax[prev.saison] === prev.numero
-    ) return true;
-    return false;
+  const numeros = Object.keys(out).map(Number).sort((a,b)=>b-a);
+  for (const n of numeros) {
+    out[n].sort((a,b)=>Number(a.position)-Number(b.position));
   }
 
-  let max = 0;
-  let run = 0;
-  let prev = null;
-
-  for (const item of allRows) {
-    if (isConsecutive(prev, item)) {
-      run++;
-    } else {
-      run = 1;
-    }
-    if (run > max) max = run;
-    prev = item;
-  }
-
-  const allCurrentSeasonNumeros = allTotals
-    .filter(r => Number(r.saison) === currentSeason)
-    .map(r => Number(r.Numero))
-    .filter(Number.isFinite);
-
-  if (!allCurrentSeasonNumeros.length) {
-    return { current: 0, max };
-  }
-
-  const lastChallenge = { saison: currentSeason, numero: Math.max(...allCurrentSeasonNumeros) };
-  const lastPlayed = allRows[allRows.length - 1];
-
-  let current = 0;
-  if (lastPlayed.saison === lastChallenge.saison && lastPlayed.numero === lastChallenge.numero) {
-    current = 1;
-    for (let i = allRows.length - 2; i >= 0; i--) {
-      if (isConsecutive(allRows[i], allRows[i + 1])) {
-        current++;
-      } else {
-        break;
-      }
-    }
-  }
-
-  return { current, max };
+  return { byNumero: out, numeros };
 }
 
-function computeTotal5K(roundRows) {
-  return roundRows.filter(r => {
-    const d = Number(r.distance);
-    return Number.isFinite(d) && d <= 0.185;
-  }).length;
+function renderSeasonHistory(rows) {
+  const { byNumero, numeros } = groupRowsByNumero(rows);
+  if (!numeros.length) return '<div class="muted">Aucun challenge dans cette saison.</div>';
+  return numeros.map(n => renderHistoryBlock(n, byNumero[n])).join("");
 }
 
-function streakClass(n) {
-  if (n >= 50) return "streak-good";
-  if (n >= 10) return "streak-mid";
-  return "streak-low";
-}
-
-
-function renderSummary(rows, currentSeason, roundRows, allTotals) {
-  const scores = rows.map(r => num(r.total_score));
-  const seasons = [...new Set(rows.map(r => String(r.saison)))];
-  const currentRows = rows.filter(r => Number(r.saison) === currentSeason);
-  const currentScores = currentRows.map(r => num(r.total_score));
-
-  const streak = computeStreaks(rows, allTotals, currentSeason);
-  const total5k = computeTotal5K(roundRows);
-
-  const stats = [
-    ["Streak", `${streak.current} (${streak.max})`, streakClass(streak.current)],
-    ["Participations", scores.length, ""],
-    ["Saisons", seasons.length, ""],
-    ["5K", total5k, ""],
-    ["Meilleur score", scores.length ? formatScore(Math.max(...scores)) : "—", ""],
-
-    ["Moyenne", scores.length ? formatScore(Math.round(average(scores))) : "—", ""],
-    ["Médiane", scores.length ? formatScore(Math.round(median(scores))) : "—", ""],
-    ["Meilleur score saison courante", currentScores.length ? formatScore(Math.max(...currentScores)) : "—", ""],
-        
-  ];
-
-  return stats.map(([label, value, extraClass]) => `
-    <div class="stat">
-      <div class="stat-label">${esc(label)}</div>
-      <div class="stat-value ${esc(extraClass || "")}">${esc(value)}</div>
+function renderArchiveSeason(season, rows, open=false) {
+  return `<details class="archive-season"${open ? ' open' : ''}>
+    <summary>Saison ${esc(season)}</summary>
+    <div class="archive-season-content">
+      ${renderSeasonHistory(rows)}
     </div>
-  `).join("");
+  </details>`;
 }
 
-function renderSeasonMedals(rows, currentSeason) {
-  const items = seasonStatsRows(rows, currentSeason);
-  if (!items.length) return empty("Aucune donnée.");
-  return `<table>
-    <thead>
-      <tr>
-        <th>Saison</th>
-        <th class="center">Médailles</th>
-        <th class="num">Runs</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${items.map(s => `
-        <tr>
-          <td>Saison ${esc(s.season)}</td>
-          <td><div class="medal-grid">
-            ${renderMedalPair("netherite", s.medals.netherite)}
-            ${renderMedalPair("emerald", s.medals.emerald)}
-            ${renderMedalPair("diamond", s.medals.diamond)}
-            ${renderMedalPair("gold", s.medals.gold)}
-            ${renderMedalPair("iron", s.medals.iron)}
-            ${renderMedalPair("copper", s.medals.copper)}
-          </div></td>
-          <td class="num">${esc(s.count)}</td>
-        </tr>
-      `).join("")}
-    </tbody>
-  </table>`;
-}
+function renderArchives(bySeason, currentSeason) {
+  const seasons = Object.keys(bySeason)
+    .map(Number)
+    .filter(s => s !== currentSeason)
+    .sort((a,b)=>b-a);
 
-function renderSeasonScores(rows, currentSeason) {
-  const items = seasonStatsRows(rows, currentSeason);
-  if (!items.length) return empty("Aucune donnée.");
-  return `<table>
-    <thead>
-      <tr>
-        <th>Saison</th>
-        <th class="num">Runs</th>
-        <th class="num">Meilleur</th>
-        <th class="num">Médiane</th>
-        <th class="num">Moyenne</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${items.map(s => `
-        <tr>
-          <td>${s.season === currentSeason ? "Saison " + esc(s.season) + " (courante)" : "Saison " + esc(s.season)}</td>
-          <td class="num">${esc(s.count)}</td>
-          <td class="num">${esc(formatScore(s.best))}</td>
-          <td class="num">${esc(formatScore(Math.round(s.median)))}</td>
-          <td class="num">${esc(formatScore(Math.round(s.mean)))}</td>
-        </tr>
-      `).join("")}
-    </tbody>
-  </table>`;
-}
-
-
-function countryCodeToFlag(code) {
-  const cc = String(code || "").trim().toUpperCase();
-  if (!/^[A-Z]{2}$/.test(cc)) return "";
-  return [...cc].map(c => String.fromCodePoint(127397 + c.charCodeAt(0))).join("");
-}
-
-
-function countryLabel(code){
-  try {
-    const cc = String(code || "").trim().toUpperCase();
-    const dn = new Intl.DisplayNames(['fr'], { type: 'region' });
-    return dn.of(cc) || cc;
-  } catch {
-    return String(code || "").trim().toUpperCase();
+  if (!seasons.length) {
+    return '<div class="muted">Aucune archive pour le moment.</div>';
   }
+
+  return seasons.map((season, idx) => renderArchiveSeason(season, bySeason[season], false)).join("");
 }
 
 
-
-function renderCountryStats(rows) {
-  const items = countryStatsRows(rows);
-  if (!items.length) return empty("Aucune donnée pays.");
-  return `<table>
-    <thead>
-      <tr>
-        <th>Pays</th>
-        <th class="num">5k</th>
-        <th class="num">Min</th>
-        <th class="num">Médiane</th>
-        
-        <th class="num">Rounds</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${items.map(r => `
-        <tr>
-          <td>${esc(countryCodeToFlag(r.country))} ${esc(countryLabel(r.country))}</td>
-          <td class="num">${esc(r.fivek)}</td>
-          <td class="num">${esc(formatDistance(r.min))}</td>
-          <td class="num">${esc(formatDistance(r.median))}</td>
-          
-          <td class="num">${esc(r.count)}</td>
-        </tr>
-      `).join("")}
-    </tbody>
-  </table>`;
+function renderTwitch(channel) {
+  const parent = encodeURIComponent(location.hostname);
+  const src = `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parent}&muted=true`;
+  return `<iframe src="${src}" height="300" allowfullscreen frameborder="0"></iframe>`;
 }
 
-function renderMapStats(rows) {
-  const items = mapStatsRows(rows);
-  if (!items.length) return empty("Aucune donnée map.");
-  return `<table>
-    <thead>
-      <tr>
-        <th>Map</th>
-        <th class="num">Parties</th>
-        <th class="num">Meilleur</th>
-        <th class="num">Médiane</th>
-        
-      </tr>
-    </thead>
-    <tbody>
-      ${items.map(r => `
-        <tr>
-          <td>${esc(r.map)}</td>
-          <td class="num">${esc(r.count)}</td>
-          <td class="num">${esc(formatScore(r.best))}</td>
-          <td class="num">${esc(formatScore(Math.round(r.median)))}</td>
-          
-        </tr>
-      `).join("")}
-    </tbody>
-  </table>`;
+function renderYT(pl) {
+  const src = `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(pl)}`;
+  return `<iframe src="${src}" height="300" allowfullscreen frameborder="0"></iframe>`;
 }
 
 (async () => {
-  const params = new URLSearchParams(location.search);
-  const playerParam = params.get("player") || "";
-  const playerIdParam = params.get("player_id") || "";
+  const cfg = parseKV(await loadText("data/current.txt"));
 
-  const playerParamsEl = document.getElementById("playerParams");
-  if (playerParamsEl) {
-    playerParamsEl.innerHTML = `
-      <div class="muted">player = <code>${esc(playerParam || "—")}</code></div>
-      <div class="muted">player_id = <code>${esc(playerIdParam || "—")}</code></div>
-    `;
+  if (cfg.challenge_id) {
+    document.getElementById("currentMeta").textContent = "Challenge en cours";
+    document.getElementById("currentLink").href = BASE_URL + cfg.challenge_id;
+  } else {
+    document.getElementById("currentMeta").textContent = "Aucun challenge en cours";
+    document.getElementById("currentLink").style.display = "none";
   }
 
-  if (!playerParam && !playerIdParam) {
-    document.getElementById("pageTitle").textContent = "Stats joueur";
-    document.getElementById("playerSubtitle").textContent = "Aucun joueur fourni dans l’URL.";
-    document.getElementById("summaryStats").innerHTML = empty("Ajoute ?player=Pseudo ou ?player_id=ID dans l’URL.");
-    return;
+  if (cfg.twitch_channel) {
+    const el = document.getElementById("twitchWrap");
+    el.classList.remove("muted");
+    el.innerHTML = renderTwitch(cfg.twitch_channel);
   }
 
-  const [totals, rounds] = await Promise.all([
-    loadTSV("data/totals.tsv"),
-    loadTSV("data/rounds.tsv")
-  ]);
-
-  const totalRows = totals.filter(r => {
-    if (playerIdParam) return String(r.player_id || "") === playerIdParam;
-    return String(r.player || "") === playerParam;
-  });
-
-  const roundRows = rounds.filter(r => {
-    if (playerIdParam) return String(r.player_id || "") === playerIdParam;
-    return String(r.player || "") === playerParam;
-  });
-
-  if (!totalRows.length) {
-    document.getElementById("pageTitle").textContent = "Joueur introuvable";
-    document.getElementById("playerSubtitle").textContent = "Aucune ligne trouvée dans data/totals.tsv.";
-    document.getElementById("summaryStats").innerHTML = empty("Joueur non trouvé.");
-    return;
+  if (cfg.youtube_playlist) {
+    const el = document.getElementById("ytWrap");
+    el.classList.remove("muted");
+    el.innerHTML = renderYT(cfg.youtube_playlist);
   }
 
-  const playerName = totalRows[0].player || playerParam || playerIdParam;
-  const currentSeason = Math.max(...totals.map(r => Number(r.saison)).filter(Number.isFinite));
+  const totals = await loadTSV("data/totals.tsv");
+  if (!totals.length) return;
 
-  document.title = `Stats joueur — ${playerName}`;
-  document.getElementById("pageTitle").textContent = playerName;
-  document.getElementById("playerSubtitle").textContent =
-    `${totalRows.length} challenge(s) enregistré(s) · saison courante : ${currentSeason}`;
+  const currentSeason = getCurrentSeason(cfg, totals);
+  const bySeason = groupRowsBySeason(totals);
+  const currentSeasonRows = bySeason[currentSeason] || [];
 
-  document.getElementById("summaryStats").innerHTML = renderSummary(totalRows, currentSeason, roundRows, totals);
-  document.getElementById("totalMedals").innerHTML = renderLargeMedals(medalCounts(totalRows));
-  document.getElementById("seasonMedals").innerHTML = renderSeasonMedals(totalRows, currentSeason);
-  document.getElementById("seasonScores").innerHTML = renderSeasonScores(totalRows, currentSeason);
-  document.getElementById("countryStats").innerHTML = renderCountryStats(roundRows);
-  document.getElementById("mapStats").innerHTML = renderMapStats(totalRows);
-})().catch(err => {
-  document.getElementById("playerSubtitle").textContent = "Erreur de chargement.";
-  document.getElementById("summaryStats").innerHTML = empty(String(err));
-});
+  const seasonMedalRanking = computeMedalRanking(currentSeasonRows);
+  const seasonMedalRankingEl = document.getElementById("seasonMedalRanking");
+  if (seasonMedalRankingEl) {
+    seasonMedalRankingEl.innerHTML = renderMedalRanking(seasonMedalRanking);
+  }
+
+  const totalMedalRanking = computeMedalRanking(totals);
+  const totalMedalRankingEl = document.getElementById("totalMedalRanking");
+  if (totalMedalRankingEl) {
+    totalMedalRankingEl.innerHTML = renderMedalRanking(totalMedalRanking);
+  }
+
+  const { byNumero, numeros } = groupRowsByNumero(currentSeasonRows);
+
+  const currentChallengeId = String(cfg.challenge_id || "").trim();
+  let currentNumero = null;
+  let currentRows = [];
+
+  if (currentChallengeId) {
+    currentRows = currentSeasonRows
+      .filter(r => String(r.challenge_id || "").trim() === currentChallengeId)
+      .sort((a, b) => Number(a.position) - Number(b.position));
+
+    if (currentRows.length) {
+      currentNumero = Number(currentRows[0].Numero);
+      const currentMap = currentRows[0].map || "";
+      document.getElementById("currentMeta").textContent =
+        `Saison ${currentSeason} — Challenge #${currentNumero} — ${currentMap}`;
+      document.getElementById("currentLink").style.display = "";
+      document.getElementById("currentLink").href = BASE_URL + currentChallengeId;
+      document.getElementById("currentLeaderboard").innerHTML = renderLeaderboard(currentRows);
+    } else {
+      document.getElementById("currentMeta").textContent = `Saison ${currentSeason} — Challenge du jour en cours`;
+      document.getElementById("currentLink").style.display = "";
+      document.getElementById("currentLink").href = BASE_URL + currentChallengeId;
+      document.getElementById("currentLeaderboard").innerHTML =
+        '<div class="muted">Aucun résultat enregistré pour le moment.</div>';
+    }
+  } else {
+    document.getElementById("currentMeta").textContent = "Aucun challenge en cours";
+    document.getElementById("currentLink").style.display = "none";
+    document.getElementById("currentLeaderboard").innerHTML =
+      '<div class="muted">Aucun résultat pour le moment.</div>';
+  }
+
+  const completedNumeros = numeros.filter(n => n !== currentNumero);
+
+  if (completedNumeros.length) {
+    const last = completedNumeros[0];
+    document.getElementById("lastMeta").textContent =
+      `Saison ${currentSeason} — Challenge #${last} — ${byNumero[last][0].map}`;
+    document.getElementById("lastLink").style.display = "";
+    document.getElementById("lastLink").href =
+      BASE_URL + (byNumero[last][0].challenge_id || "");
+    document.getElementById("lastLeaderboard").innerHTML =
+      renderLeaderboard(byNumero[last]);
+
+    document.getElementById("history").innerHTML =
+      completedNumeros.slice(1).map(n => renderHistoryBlock(n, byNumero[n])).join("") ||
+      '<div class="muted">Pas encore d’historique pour cette saison.</div>';
+  } else {
+    document.getElementById("lastMeta").textContent = `Aucun challenge terminé pour la saison ${currentSeason}`;
+    document.getElementById("lastLink").style.display = "none";
+    document.getElementById("lastLeaderboard").innerHTML = '<div class="muted">Aucun résultat pour le moment.</div>';
+    document.getElementById("history").innerHTML = '<div class="muted">Pas encore d’historique pour cette saison.</div>';
+  }
+
+  const seasonHistoryTitle = document.getElementById("seasonHistoryTitle");
+  if (seasonHistoryTitle) {
+    seasonHistoryTitle.textContent = `Historique — Saison ${currentSeason}`;
+  }
+
+  const archivesEl = document.getElementById("archives");
+  if (archivesEl) {
+    archivesEl.classList.remove("muted");
+    archivesEl.innerHTML = renderArchives(bySeason, currentSeason);
+  }
+})();
 </script>
 </body>
 </html>
