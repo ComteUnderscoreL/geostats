@@ -4,13 +4,6 @@ set -euo pipefail
 export LC_ALL=C
 export LANG=C
 
-# Usage:
-#   export COOKIE_LINE='COLLE ICI TOUT CE QU IL Y A APRES "Cookie:"'
-#   ./scrape_update_safe.sh
-#   ./scrape_update_safe.sh "https://www.geoguessr.com/challenge/XXXX"
-#   ./scrape_update_safe.sh "XXXX"
-#   ./scrape_update_safe.sh "" data
-#
 # Default behavior:
 #   - OUTDIR defaults to "data"
 #   - if no challenge is provided, reads challenge_id from data/current.txt
