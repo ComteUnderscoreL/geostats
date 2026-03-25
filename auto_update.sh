@@ -8,10 +8,8 @@ while true; do
 
   cd "$REPO_DIR"
 
-  # run scraper
-  ./scrape_update_safe_v2.sh
+  ./scrape.sh
 
-  # stage only needed files
   git add data/current.txt data/rounds.tsv data/totals.tsv
 
   # commit only if changes
@@ -19,7 +17,8 @@ while true; do
     echo "[INFO] No changes"
   else
     git commit -m "auto update $(date '+%Y-%m-%d %H:%M')"
-    git push
+    git pull --rebase --autostash origin main
+    git push origin main
     echo "[INFO] pushed"
   fi
 
