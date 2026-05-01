@@ -1,5 +1,5 @@
-date=2026-05-01
+date=2026-05-02
 saison=1
-challenge_id=eBBCJqS11gj9VN91
+challenge_id=PYCtX1fE0aCkUfFn
 twitch_channel=comte_L
 youtube_playlist=PLHQFZFMnBYhLZmNmTBlrAg27XfiAvELdQ
