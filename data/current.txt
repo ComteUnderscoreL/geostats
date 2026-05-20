@@ -1,4 +1,4 @@
-date=2026-05-21
+date=2026-05-20
 saison=1
 challenge_id=BlySmDTP1EJLQh9Z
 twitch_channel=comte_L
