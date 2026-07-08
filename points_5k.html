@@ -3,19 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>5K Points — Regions</title>
+  <title>Points 5K du Daily</title>
   <style>
     html, body {
       margin: 0;
       min-height: 100%;
-      background: #101820;
+      background: #0b1220;
       color: white;
       font-family: system-ui, Arial, sans-serif;
     }
 
-    body {
-      overflow-x: hidden;
-    }
+    body { overflow-x: hidden; }
 
     header {
       padding: 18px 22px 6px;
@@ -60,13 +58,11 @@
       touch-action: none;
     }
 
-    svg:active {
-      cursor: grabbing;
-    }
+    svg:active { cursor: grabbing; }
 
     .sphere {
-      fill: #15324a;
-      stroke: #7fa4c2;
+      fill: #162444;
+      stroke: #6f8fb8;
       stroke-width: 1.2;
     }
 
@@ -77,20 +73,20 @@
     }
 
     .land-base {
-      fill: #d8d0b8;
+      fill: #cfc6ad;
       stroke: none;
     }
 
     .land-outline {
       fill: none;
-      stroke: #26342b;
+      stroke: #1f2a44;
       stroke-width: 0.55;
       pointer-events: none;
     }
 
     .point {
       fill: #ffffff;
-      stroke: #101820;
+      stroke: #0b1220;
       stroke-width: 0.75;
       opacity: 0.88;
       cursor: pointer;
@@ -112,7 +108,7 @@
       position: fixed;
       display: none;
       pointer-events: none;
-      background: rgba(12,18,25,0.94);
+      background: rgba(11,18,32,0.96);
       color: white;
       border: 1px solid rgba(255,255,255,0.25);
       border-radius: 10px;
@@ -120,7 +116,7 @@
       font-size: 14px;
       box-shadow: 0 8px 25px rgba(0,0,0,0.35);
       z-index: 20;
-      max-width: 340px;
+      max-width: 360px;
     }
 
     .tooltip strong {
@@ -193,9 +189,9 @@
 
 <body>
   <header>
-    <h1>5K Points</h1>
-    <div class="subtitle">All locations where at least one player got 5K</div>
-    <div id="stats">Loading…</div>
+    <h1>Points 5K du Daily</h1>
+    <div class="subtitle">Tous les lieux du daily où au moins un joueur a fait 5K</div>
+    <div id="stats">Chargement des TSV…</div>
   </header>
 
   <main id="globe-wrap">
@@ -203,13 +199,21 @@
     <div id="tooltip" class="tooltip"></div>
   </main>
 
-  <a class="bottom-link" href="index.html">← Regions</a>
+  <a class="bottom-link" href="index.html">← Retour au daily</a>
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
   <script>
-    const POINTS_URL = "data/coords_5k.json?v=1";
+    const TSV_URLS = [
+      "https://raw.githubusercontent.com/ComteUnderscoreL/geostats/main/data/rounds.tsv",
+      "https://raw.githubusercontent.com/ComteUnderscoreL/geostats/main/data/rounds2.tsv"
+    ];
+
     const LAND_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json";
+
+    // Distance max considérée comme 5K.
+    // 0.025 km = 25 mètres. Change à 0.05 si tu veux être plus large.
+    const FIVE_K_MAX_DISTANCE_KM = 0.025;
 
     const svg = d3.select("#globe");
     const tooltip = d3.select("#tooltip");
@@ -255,12 +259,39 @@
       return rotated[0] > -90 && rotated[0] < 90;
     }
 
-    function streetViewUrl(lng, lat) {
-      return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
+    function parseNumber(value) {
+      if (value === undefined || value === null) return NaN;
+      return Number(String(value).trim().replace(",", "."));
     }
 
-    function mapsUrl(lng, lat) {
-      return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    function pick(row, names) {
+      for (const name of names) {
+        if (row[name] !== undefined && row[name] !== "") return row[name];
+      }
+
+      const lower = {};
+      for (const key of Object.keys(row)) {
+        lower[key.trim().toLowerCase()] = row[key];
+      }
+
+      for (const name of names) {
+        const key = name.trim().toLowerCase();
+        if (lower[key] !== undefined && lower[key] !== "") return lower[key];
+      }
+
+      return "";
+    }
+
+    function normalizePlayerId(name) {
+      return String(name || "unknown")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "_")
+        .replace(/[^a-z0-9_-]/g, "") || "unknown";
+    }
+
+    function streetViewUrl(lng, lat) {
+      return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
     }
 
     function formatCoord(value) {
@@ -288,16 +319,17 @@
     }
 
     function showTooltip(event, d) {
-      const players = d.players.slice(0, 12).map(p => `<span class="player-pill">${p}</span>`).join("");
-      const more = d.players.length > 12 ? `<span class="player-pill">+${d.players.length - 12}</span>` : "";
+      const players = d.players.slice(0, 14).map(p => `<span class="player-pill">${p}</span>`).join("");
+      const more = d.players.length > 14 ? `<span class="player-pill">+${d.players.length - 14}</span>` : "";
 
       tooltip
         .style("display", "block")
         .html(`
-          <strong>${d.players.length} player${d.players.length > 1 ? "s" : ""} got 5K</strong>
-          <div>${d.country_code || "Unknown"} · ${formatCoord(d.lat)}, ${formatCoord(d.lng)}</div>
+          <strong>${d.players.length} joueur${d.players.length > 1 ? "s" : ""} à 5K</strong>
+          <div>${d.country_code || "Pays inconnu"} · ${formatCoord(d.lat)}, ${formatCoord(d.lng)}</div>
+          <div class="small">${d.records.length} round${d.records.length > 1 ? "s" : ""} 5K · max ${FIVE_K_MAX_DISTANCE_KM} km</div>
           <div class="players">${players}${more}</div>
-          <div class="small">Click to open Google Street View</div>
+          <div class="small">Clique pour ouvrir Google Street View</div>
         `);
 
       positionTooltip(event);
@@ -325,13 +357,10 @@
       points.enter()
         .append("circle")
         .attr("class", d => d.players.length > 1 ? "point cluster" : "point")
-        .attr("r", d => Math.min(radius + Math.sqrt(d.players.length) * 0.8, 9))
         .on("mouseenter", (event, d) => showTooltip(event, d))
         .on("mousemove", (event) => positionTooltip(event))
         .on("mouseleave", hideTooltip)
-        .on("click", (event, d) => {
-          window.open(streetViewUrl(d.lng, d.lat), "_blank");
-        })
+        .on("click", (event, d) => window.open(streetViewUrl(d.lng, d.lat), "_blank"))
         .merge(points)
         .attr("cx", d => {
           const p = projection([d.lng, d.lat]);
@@ -387,34 +416,60 @@
       startSmoothLoop();
     }
 
-    function groupPoints(featureCollection) {
-      const grouped = new Map();
+    function tsvRowsTo5kRecords(rows, sourceName) {
+      const records = [];
 
-      for (const feature of featureCollection.features || []) {
-        const coords = feature.geometry?.coordinates || [];
-        const lng = Number(coords[0]);
-        const lat = Number(coords[1]);
-        const props = feature.properties || {};
+      for (const row of rows) {
+        const lat = parseNumber(pick(row, ["lat", "latitude"]));
+        const lng = parseNumber(pick(row, ["lng", "lon", "longitude"]));
+        const distance = parseNumber(pick(row, ["distance", "distance_km", "distance (km)", "dist_km"]));
 
         if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+        if (!Number.isFinite(distance) || distance > FIVE_K_MAX_DISTANCE_KM) continue;
 
-        const key = `${lat.toFixed(5)},${lng.toFixed(5)}`;
+        const player = String(pick(row, ["player", "name", "player_name"]) || "unknown");
+        const playerId = String(pick(row, ["player_id", "user_id"]) || normalizePlayerId(player));
+
+        records.push({
+          lat,
+          lng,
+          distance_km: distance,
+          country_code: String(pick(row, ["country_code", "country"]) || ""),
+          numero: String(pick(row, ["numero", "challenge", "challenge_id", "id"]) || ""),
+          round: String(pick(row, ["round", "round_number"]) || ""),
+          player_id: playerId,
+          player,
+          source_file: sourceName
+        });
+      }
+
+      return records;
+    }
+
+    function groupRecords(records) {
+      const grouped = new Map();
+
+      for (const rec of records) {
+        const key = `${rec.lat.toFixed(5)},${rec.lng.toFixed(5)}`;
 
         if (!grouped.has(key)) {
           grouped.set(key, {
             key,
-            lat,
-            lng,
-            country_code: props.country_code || "",
+            lat: rec.lat,
+            lng: rec.lng,
+            country_code: rec.country_code,
             players: new Set(),
             records: []
           });
         }
 
         const point = grouped.get(key);
-        if (props.player) point.players.add(props.player);
-        if (!props.player && props.player_id) point.players.add(props.player_id);
-        point.records.push(props);
+        point.players.add(rec.player || rec.player_id || "unknown");
+        point.records.push(rec);
+
+        if (!point.country_code && rec.country_code) {
+          point.country_code = rec.country_code;
+        }
       }
 
       return [...grouped.values()].map(point => ({
@@ -474,24 +529,32 @@
 
     async function load() {
       try {
-        const [world, points] = await Promise.all([
+        const [world, ...tsvTexts] = await Promise.all([
           d3.json(LAND_URL),
-          d3.json(POINTS_URL)
+          ...TSV_URLS.map(url => d3.text(url + "?v=" + Date.now()))
         ]);
 
         landData = topojson.feature(world, world.objects.land);
-        pointData = groupPoints(points);
+
+        const records = [];
+
+        tsvTexts.forEach((text, i) => {
+          const rows = d3.tsvParse(text);
+          records.push(...tsvRowsTo5kRecords(rows, TSV_URLS[i].split("/").pop()));
+        });
+
+        pointData = groupRecords(records);
 
         const totalPlayers = new Set();
         pointData.forEach(point => point.players.forEach(p => totalPlayers.add(p)));
 
         document.getElementById("stats").textContent =
-          `${pointData.length} unique 5K locations · ${totalPlayers.size} players`;
+          `${pointData.length} lieux 5K uniques · ${records.length} rounds 5K · ${totalPlayers.size} joueurs`;
 
         redraw();
       } catch (error) {
         console.error(error);
-        document.getElementById("stats").textContent = "Could not load data/coords_5k.json";
+        document.getElementById("stats").textContent = "Impossible de charger les TSV de geostats";
       }
     }
 
