@@ -480,7 +480,7 @@ function mapStatsRows(rows) {
       worst: vals.length ? Math.min(...vals) : null,
       count: vals.length
     };
-  }).sort((a,b) => (b.best ?? -Infinity) - (a.best ?? -Infinity) || a.map.localeCompare(b.map));
+  }).sort((a,b) => (a.median ?? Infinity) - (b.median ?? Infinity) || a.map.localeCompare(b.map));
 }
 
 
