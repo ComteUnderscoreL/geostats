@@ -246,6 +246,32 @@
     color:#ff9d7a;
   }
 
+  .stat-5k-inline{
+    display:inline-flex;
+    align-items:baseline;
+    gap:4px;
+  }
+
+  .stat-5k-inline a{
+    color:inherit;
+    text-decoration:none;
+    border-radius:7px;
+    padding:0 3px;
+  }
+
+  .stat-5k-inline a:hover{
+    text-decoration:underline;
+    background:rgba(97,168,255,.10);
+  }
+
+  .stat-5k-label{
+    color:var(--accent);
+  }
+
+  .stat-5k-count{
+    color:#fff;
+  }
+
 </style>
 </head>
 <body>
@@ -540,10 +566,45 @@ function computeStreaks(playerRows, allTotals, currentSeason) {
 }
 
 function computeTotal5K(roundRows) {
-  return roundRows.filter(r => {
-    const d = Number(r.distance);
-    return Number.isFinite(d) && d <= 0.185;
-  }).length;
+  const coords = new Set();
+
+  for (const r of roundRows) {
+    const d = Number(String(r.distance ?? "").replace(",", "."));
+    if (!Number.isFinite(d) || d > 0.185) continue;
+
+    const lat = Number(String(r.lat ?? "").replace(",", "."));
+    const lng = Number(String(r.lng ?? "").replace(",", "."));
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+
+    coords.add(`${lat.toFixed(5)},${lng.toFixed(5)}`);
+  }
+
+  return coords.size;
+}
+
+function buildPlayer5KUrl(playerParam, playerIdParam) {
+  if (playerIdParam) return `points_5k.html?player=${encodeURIComponent(playerIdParam)}`;
+  return `points_5k.html?player=${encodeURIComponent(playerParam)}`;
+}
+
+function render5KStatValue(total5k, playerParam, playerIdParam) {
+  const playerUrl = buildPlayer5KUrl(playerParam, playerIdParam);
+
+  return `
+    <span class="stat-5k-inline">
+      <a
+        class="stat-5k-label"
+        href="points_5k.html"
+        title="Voir la carte de tous les points 5K du daily"
+      >5K</a>
+      <span>:</span>
+      <a
+        class="stat-5k-count"
+        href="${esc(playerUrl)}"
+        title="Voir uniquement les points 5K de ce joueur"
+      >${esc(total5k)}</a>
+    </span>
+  `;
 }
 
 function streakClass(n) {
@@ -553,7 +614,7 @@ function streakClass(n) {
 }
 
 
-function renderSummary(rows, currentSeason, roundRows, allTotals) {
+function renderSummary(rows, currentSeason, roundRows, allTotals, playerParam, playerIdParam) {
   const scores = rows.map(r => num(r.total_score));
   const seasons = [...new Set(rows.map(r => String(r.saison)))];
   const currentRows = rows.filter(r => Number(r.saison) === currentSeason);
@@ -566,7 +627,7 @@ function renderSummary(rows, currentSeason, roundRows, allTotals) {
     ["Streak", `${streak.current} (${streak.max})`, streakClass(streak.current)],
     ["Participations", scores.length, ""],
     ["Saisons", seasons.length, ""],
-    ["5K", total5k, ""],
+    ["", render5KStatValue(total5k, playerParam, playerIdParam), ""],
     ["Meilleur score", scores.length ? formatScore(Math.max(...scores)) : "—", ""],
 
     ["Moyenne", scores.length ? formatScore(Math.round(average(scores))) : "—", ""],
@@ -575,12 +636,16 @@ function renderSummary(rows, currentSeason, roundRows, allTotals) {
         
   ];
 
-  return stats.map(([label, value, extraClass]) => `
-    <div class="stat">
-      <div class="stat-label">${esc(label)}</div>
-      <div class="stat-value ${esc(extraClass || "")}">${esc(value)}</div>
-    </div>
-  `).join("");
+  return stats.map(([label, value, extraClass]) => {
+    const isHtmlValue = String(value).includes("stat-5k-inline");
+
+    return `
+      <div class="stat">
+        ${label ? `<div class="stat-label">${esc(label)}</div>` : `<div class="stat-label">&nbsp;</div>`}
+        <div class="stat-value ${esc(extraClass || "")}">${isHtmlValue ? value : esc(value)}</div>
+      </div>
+    `;
+  }).join("");
 }
 
 function renderSeasonMedals(rows, currentSeason) {
@@ -766,7 +831,7 @@ function renderMapStats(rows) {
   document.getElementById("playerSubtitle").textContent =
     `${totalRows.length} challenge(s) enregistré(s) · saison courante : ${currentSeason}`;
 
-  document.getElementById("summaryStats").innerHTML = renderSummary(totalRows, currentSeason, roundRows, totals);
+  document.getElementById("summaryStats").innerHTML = renderSummary(totalRows, currentSeason, roundRows, totals, playerParam, playerIdParam);
   document.getElementById("totalMedals").innerHTML = renderLargeMedals(medalCounts(totalRows));
   document.getElementById("seasonMedals").innerHTML = renderSeasonMedals(totalRows, currentSeason);
   document.getElementById("seasonScores").innerHTML = renderSeasonScores(totalRows, currentSeason);
