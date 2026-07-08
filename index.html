@@ -41,11 +41,11 @@
 
     <aside class="sidebar">
       <section class="card">
-        <h3>Classement des médailles <small>— saison en cours</small></h3>
+        <h3>Classement des médailles <small>- saison en cours</small></h3>
         <div id="seasonMedalRanking" class="muted">Chargement...</div>
       </section>
       <section class="card">
-        <h3>Classement des médailles <small>— total</small></h3>
+        <h3>Classement des médailles <small>- total</small></h3>
         <div id="totalMedalRanking" class="muted">Chargement...</div>
       </section>
       <section class="card sticky">
@@ -70,6 +70,24 @@ const MEDAL_PATHS = {
   gold: "medal/gold.svg",
   iron: "medal/iron.svg",
   copper: "medal/copper.svg"
+};
+
+const MEDAL_LABELS = {
+  netherite: "Netherite",
+  emerald: "Emerald",
+  diamond: "Diamond",
+  gold: "Gold",
+  iron: "Iron",
+  copper: "Copper"
+};
+
+const MEDAL_RULES = {
+  netherite: "Netherite - 24’000+",
+  emerald: "Emerald - 23’000+",
+  diamond: "Diamond - 21’000+",
+  gold: "Gold - 18’000+",
+  iron: "Iron - 14’000+",
+  copper: "Copper - 9’000+"
 };
 
 function parseKV(text) {
@@ -137,7 +155,7 @@ function renderMedal(score) {
   const medal = getMedalName(score);
   if (!medal) return `<span class="no-medal-spacer"></span>`;
   const src = MEDAL_PATHS[medal];
-  return `<img class="medal-icon" src="${src}" alt="${medal}" title="${medal}">`;
+  return `<img class="medal-icon" src="${src}" alt="${MEDAL_LABELS[medal] || medal}" title="${MEDAL_RULES[medal] || medal}">`;
 }
 
 function renderScore(scoreRaw) {
@@ -179,7 +197,7 @@ function renderHistoryBlock(numero, rows) {
   const url = rows[0].challenge_id ? BASE_URL + rows[0].challenge_id : "#";
   return `<article class="subcard">
     <div class="row">
-      <div class="title">#${esc(numero)} — ${esc(rows[0].map)}</div>
+      <div class="title">#${esc(numero)} - ${esc(rows[0].map)}</div>
       <a class="btn small" href="${esc(url)}" target="_blank" rel="noopener">Lien</a>
     </div>
     ${renderLeaderboard(rows)}
@@ -228,7 +246,7 @@ function computeMedalRanking(rows) {
 }
 
 function renderMedalPair(name, count) {
-  return `<span class="medal-pair"><img src="${esc(MEDAL_PATHS[name])}" alt="${esc(name)}" title="${esc(name)}"><span>${esc(count)}</span></span>`;
+  return `<span class="medal-pair"><img src="${esc(MEDAL_PATHS[name])}" alt="${esc(MEDAL_LABELS[name] || name)}" title="${esc(MEDAL_RULES[name] || name)}"><span>${esc(count)}</span></span>`;
 }
 
 function renderMedalRanking(ranking) {
@@ -388,12 +406,12 @@ function renderYT(pl) {
       currentNumero = Number(currentRows[0].Numero);
       const currentMap = currentRows[0].map || "";
       document.getElementById("currentMeta").textContent =
-        `Saison ${currentSeason} — Challenge #${currentNumero} — ${currentMap}`;
+        `Saison ${currentSeason} - Challenge #${currentNumero} - ${currentMap}`;
       document.getElementById("currentLink").style.display = "";
       document.getElementById("currentLink").href = BASE_URL + currentChallengeId;
       document.getElementById("currentLeaderboard").innerHTML = renderLeaderboard(currentRows);
     } else {
-      document.getElementById("currentMeta").textContent = `Saison ${currentSeason} — Challenge du jour en cours`;
+      document.getElementById("currentMeta").textContent = `Saison ${currentSeason} - Challenge du jour en cours`;
       document.getElementById("currentLink").style.display = "";
       document.getElementById("currentLink").href = BASE_URL + currentChallengeId;
       document.getElementById("currentLeaderboard").innerHTML =
@@ -411,7 +429,7 @@ function renderYT(pl) {
   if (completedNumeros.length) {
     const last = completedNumeros[0];
     document.getElementById("lastMeta").textContent =
-      `Saison ${currentSeason} — Challenge #${last} — ${byNumero[last][0].map}`;
+      `Saison ${currentSeason} - Challenge #${last} - ${byNumero[last][0].map}`;
     document.getElementById("lastLink").style.display = "";
     document.getElementById("lastLink").href =
       BASE_URL + (byNumero[last][0].challenge_id || "");
@@ -430,7 +448,7 @@ function renderYT(pl) {
 
   const seasonHistoryTitle = document.getElementById("seasonHistoryTitle");
   if (seasonHistoryTitle) {
-    seasonHistoryTitle.textContent = `Historique — Saison ${currentSeason}`;
+    seasonHistoryTitle.textContent = `Historique - Saison ${currentSeason}`;
   }
 
   const archivesEl = document.getElementById("archives");
