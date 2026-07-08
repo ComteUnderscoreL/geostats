@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>5K Points — Regions</title>
+  <style>
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #101820;
+      color: white;
+      font-family: system-ui, Arial, sans-serif;
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+
+    header {
+      padding: 18px 22px 6px;
+      text-align: center;
+      z-index: 2;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 52px);
+      letter-spacing: 0.04em;
+    }
+
+    .subtitle {
+      margin-top: 6px;
+      color: #c8d5df;
+      font-size: 15px;
+    }
+
+    #stats {
+      margin-top: 10px;
+      color: rgba(255,255,255,0.62);
+      font-size: 13px;
+    }
+
+    #globe-wrap {
+      position: relative;
+      display: grid;
+      place-items: center;
+      overflow: visible;
+      height: min(120vh, 120vw);
+      min-height: 720px;
+    }
+
+    svg {
+      width: min(120vh, 120vw);
+      height: min(120vh, 120vw);
+      min-width: 520px;
+      min-height: 520px;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+
+    svg:active {
+      cursor: grabbing;
+    }
+
+    .sphere {
+      fill: #15324a;
+      stroke: #7fa4c2;
+      stroke-width: 1.2;
+    }
+
+    .graticule {
+      fill: none;
+      stroke: rgba(255,255,255,0.18);
+      stroke-width: 0.5;
+    }
+
+    .land-base {
+      fill: #d8d0b8;
+      stroke: none;
+    }
+
+    .land-outline {
+      fill: none;
+      stroke: #26342b;
+      stroke-width: 0.55;
+      pointer-events: none;
+    }
+
+    .point {
+      fill: #ffffff;
+      stroke: #101820;
+      stroke-width: 0.75;
+      opacity: 0.88;
+      cursor: pointer;
+      pointer-events: all;
+    }
+
+    .point:hover {
+      opacity: 1;
+      stroke: #ffffff;
+      stroke-width: 2;
+      filter: drop-shadow(0 0 6px rgba(255,255,255,0.85));
+    }
+
+    .point.cluster {
+      fill: #f2b705;
+    }
+
+    .tooltip {
+      position: fixed;
+      display: none;
+      pointer-events: none;
+      background: rgba(12,18,25,0.94);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 10px;
+      padding: 9px 11px;
+      font-size: 14px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+      z-index: 20;
+      max-width: 340px;
+    }
+
+    .tooltip strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 3px;
+    }
+
+    .tooltip .small {
+      color: rgba(255,255,255,0.62);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .players {
+      margin-top: 6px;
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .player-pill {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.16);
+      font-size: 12px;
+    }
+
+    .bottom-link {
+      position: fixed;
+      left: 16px;
+      bottom: 14px;
+      color: rgba(255,255,255,0.55);
+      font-size: 13px;
+      z-index: 2;
+      text-decoration: none;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    .bottom-link:hover {
+      color: rgba(255,255,255,0.9);
+      text-decoration: underline;
+    }
+
+    @media (max-width: 700px) {
+      #globe-wrap {
+        height: min(115vh, 115vw);
+        min-height: 620px;
+      }
+
+      svg {
+        width: min(115vh, 115vw);
+        height: min(115vh, 115vw);
+        min-width: 460px;
+        min-height: 460px;
+      }
+
+      .bottom-link {
+        position: static;
+        display: block;
+        margin: 0 16px 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>5K Points</h1>
+    <div class="subtitle">All locations where at least one player got 5K</div>
+    <div id="stats">Loading…</div>
+  </header>
+
+  <main id="globe-wrap">
+    <svg id="globe" viewBox="0 0 900 900"><defs></defs></svg>
+    <div id="tooltip" class="tooltip"></div>
+  </main>
+
+  <a class="bottom-link" href="index.html">← Regions</a>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+  <script>
+    const POINTS_URL = "data/coords_5k.json?v=1";
+    const LAND_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json";
+
+    const svg = d3.select("#globe");
+    const tooltip = d3.select("#tooltip");
+    const width = 900, height = 900;
+
+    let baseScale = 390;
+    let currentScale = baseScale;
+    let rotation = [0, -20, 0];
+    let targetRotation = [0, -20, 0];
+    let smoothTimer = null;
+    let landData = null;
+    let pointData = [];
+
+    const projection = d3.geoOrthographic()
+      .scale(currentScale)
+      .translate([width / 2, height / 2])
+      .rotate(rotation)
+      .clipAngle(90);
+
+    const path = d3.geoPath(projection);
+    const graticule = d3.geoGraticule10();
+    const sphere = { type: "Sphere" };
+
+    const g = svg.append("g");
+
+    g.append("path").datum(sphere).attr("class", "sphere");
+    g.append("path").datum(graticule).attr("class", "graticule");
+
+    const landBasePath = g.append("path").attr("class", "land-base");
+    const landOutlinePath = g.append("path").attr("class", "land-outline");
+    const pointGroup = g.append("g");
+
+    function normalizeLon(lon) {
+      return ((lon + 180) % 360 + 360) % 360 - 180;
+    }
+
+    function clampLat(lat) {
+      return Math.max(-89.5, Math.min(89.5, lat));
+    }
+
+    function isVisible(lng, lat) {
+      const rotated = d3.geoRotation(projection.rotate())([lng, lat]);
+      return rotated[0] > -90 && rotated[0] < 90;
+    }
+
+    function streetViewUrl(lng, lat) {
+      return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
+    }
+
+    function mapsUrl(lng, lat) {
+      return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    }
+
+    function formatCoord(value) {
+      return Number(value).toFixed(5);
+    }
+
+    function positionTooltip(event) {
+      const pad = 14;
+
+      let left = event.clientX + pad;
+      let top = event.clientY + pad;
+
+      tooltip
+        .style("left", `${left}px`)
+        .style("top", `${top}px`);
+
+      const rect = tooltip.node().getBoundingClientRect();
+
+      if (rect.right > window.innerWidth - 8) left = event.clientX - rect.width - pad;
+      if (rect.bottom > window.innerHeight - 8) top = event.clientY - rect.height - pad;
+
+      tooltip
+        .style("left", `${Math.max(8, left)}px`)
+        .style("top", `${Math.max(8, top)}px`);
+    }
+
+    function showTooltip(event, d) {
+      const players = d.players.slice(0, 12).map(p => `<span class="player-pill">${p}</span>`).join("");
+      const more = d.players.length > 12 ? `<span class="player-pill">+${d.players.length - 12}</span>` : "";
+
+      tooltip
+        .style("display", "block")
+        .html(`
+          <strong>${d.players.length} player${d.players.length > 1 ? "s" : ""} got 5K</strong>
+          <div>${d.country_code || "Unknown"} · ${formatCoord(d.lat)}, ${formatCoord(d.lng)}</div>
+          <div class="players">${players}${more}</div>
+          <div class="small">Click to open Google Street View</div>
+        `);
+
+      positionTooltip(event);
+    }
+
+    function hideTooltip() {
+      tooltip.style("display", "none");
+    }
+
+    function redraw() {
+      g.select(".sphere").attr("d", path);
+      g.select(".graticule").attr("d", path);
+
+      if (landData) {
+        landBasePath.datum(landData).attr("d", path);
+        landOutlinePath.datum(landData).attr("d", path);
+      }
+
+      const radius = Math.max(1.6, Math.min(4.5, currentScale / 160));
+
+      const points = pointGroup
+        .selectAll("circle")
+        .data(pointData, d => d.key);
+
+      points.enter()
+        .append("circle")
+        .attr("class", d => d.players.length > 1 ? "point cluster" : "point")
+        .attr("r", d => Math.min(radius + Math.sqrt(d.players.length) * 0.8, 9))
+        .on("mouseenter", (event, d) => showTooltip(event, d))
+        .on("mousemove", (event) => positionTooltip(event))
+        .on("mouseleave", hideTooltip)
+        .on("click", (event, d) => {
+          window.open(streetViewUrl(d.lng, d.lat), "_blank");
+        })
+        .merge(points)
+        .attr("cx", d => {
+          const p = projection([d.lng, d.lat]);
+          return p ? p[0] : -9999;
+        })
+        .attr("cy", d => {
+          const p = projection([d.lng, d.lat]);
+          return p ? p[1] : -9999;
+        })
+        .style("display", d => isVisible(d.lng, d.lat) ? null : "none")
+        .attr("r", d => Math.min(radius + Math.sqrt(d.players.length) * 0.8, 9));
+
+      points.exit().remove();
+    }
+
+    function applyRotation(r) {
+      rotation = [normalizeLon(r[0]), clampLat(r[1]), 0];
+      projection.rotate(rotation);
+      hideTooltip();
+      redraw();
+    }
+
+    function startSmoothLoop() {
+      if (smoothTimer) return;
+
+      smoothTimer = d3.timer(() => {
+        const ease = 0.18;
+
+        let lonDiff = targetRotation[0] - rotation[0];
+
+        if (lonDiff > 180) lonDiff -= 360;
+        if (lonDiff < -180) lonDiff += 360;
+
+        const latDiff = targetRotation[1] - rotation[1];
+
+        if (Math.abs(lonDiff) < 0.01 && Math.abs(latDiff) < 0.01) {
+          applyRotation(targetRotation);
+          smoothTimer.stop();
+          smoothTimer = null;
+          return;
+        }
+
+        applyRotation([
+          rotation[0] + lonDiff * ease,
+          rotation[1] + latDiff * ease,
+          0
+        ]);
+      });
+    }
+
+    function setTargetRotation(r) {
+      targetRotation = [normalizeLon(r[0]), clampLat(r[1]), 0];
+      startSmoothLoop();
+    }
+
+    function groupPoints(featureCollection) {
+      const grouped = new Map();
+
+      for (const feature of featureCollection.features || []) {
+        const coords = feature.geometry?.coordinates || [];
+        const lng = Number(coords[0]);
+        const lat = Number(coords[1]);
+        const props = feature.properties || {};
+
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+
+        const key = `${lat.toFixed(5)},${lng.toFixed(5)}`;
+
+        if (!grouped.has(key)) {
+          grouped.set(key, {
+            key,
+            lat,
+            lng,
+            country_code: props.country_code || "",
+            players: new Set(),
+            records: []
+          });
+        }
+
+        const point = grouped.get(key);
+        if (props.player) point.players.add(props.player);
+        if (!props.player && props.player_id) point.players.add(props.player_id);
+        point.records.push(props);
+      }
+
+      return [...grouped.values()].map(point => ({
+        ...point,
+        players: [...point.players].sort((a, b) => a.localeCompare(b))
+      }));
+    }
+
+    let dragStart = null;
+    let dragStartRotation = null;
+
+    svg.call(d3.drag()
+      .on("start", event => {
+        if (smoothTimer) {
+          smoothTimer.stop();
+          smoothTimer = null;
+        }
+
+        hideTooltip();
+
+        dragStart = [event.x, event.y];
+        dragStartRotation = [...rotation];
+        targetRotation = [...rotation];
+      })
+      .on("drag", event => {
+        const zoomFactor = currentScale / baseScale;
+        const speed = 0.35 / zoomFactor;
+
+        const dx = event.x - dragStart[0];
+        const dy = event.y - dragStart[1];
+
+        const newLon = dragStartRotation[0] + dx * speed;
+        const newLat = dragStartRotation[1] - dy * speed;
+
+        targetRotation = [normalizeLon(newLon), clampLat(newLat), 0];
+        applyRotation(targetRotation);
+      })
+      .on("end", () => {
+        dragStart = null;
+        dragStartRotation = null;
+      })
+    );
+
+    svg.call(d3.zoom()
+      .scaleExtent([0.6, 10])
+      .filter(event => event.type === "wheel")
+      .on("zoom", event => {
+        currentScale = baseScale * event.transform.k;
+        projection.scale(currentScale);
+        hideTooltip();
+        redraw();
+      })
+    );
+
+    svg.on("dblclick.zoom", null);
+    svg.on("dblclick", () => setTargetRotation([0, -20, 0]));
+
+    async function load() {
+      try {
+        const [world, points] = await Promise.all([
+          d3.json(LAND_URL),
+          d3.json(POINTS_URL)
+        ]);
+
+        landData = topojson.feature(world, world.objects.land);
+        pointData = groupPoints(points);
+
+        const totalPlayers = new Set();
+        pointData.forEach(point => point.players.forEach(p => totalPlayers.add(p)));
+
+        document.getElementById("stats").textContent =
+          `${pointData.length} unique 5K locations · ${totalPlayers.size} players`;
+
+        redraw();
+      } catch (error) {
+        console.error(error);
+        document.getElementById("stats").textContent = "Could not load data/coords_5k.json";
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>
