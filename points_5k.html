@@ -188,6 +188,59 @@
       text-decoration: underline;
     }
 
+    .player-table-section {
+      max-width: 720px;
+      margin: 20px auto 46px;
+      padding: 0 16px;
+    }
+
+    .player-table-section h2 {
+      margin: 0 0 10px;
+      font-size: 22px;
+      letter-spacing: 0.03em;
+    }
+
+    .player-table-wrap {
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .player-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .player-table th,
+    .player-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .player-table th {
+      color: rgba(255,255,255,0.72);
+      font-weight: 600;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .player-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .player-table .num {
+      text-align: right;
+      font-weight: 700;
+    }
+
+    .player-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     @media (max-width: 700px) {
       #globe-wrap {
         height: min(115vh, 115vw);
@@ -222,6 +275,24 @@
     <div id="tooltip" class="tooltip"></div>
   </main>
 
+  <section class="player-table-section">
+    <h2>Classement 5K</h2>
+    <div class="player-table-wrap">
+      <table class="player-table">
+        <thead>
+          <tr>
+            <th>Joueur</th>
+            <th class="num">Points 5K</th>
+            <th class="num">Rounds 5K</th>
+          </tr>
+        </thead>
+        <tbody id="player-ranking">
+          <tr><td colspan="3">Chargement…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
   <a class="bottom-link" href="index.html">← Retour au daily</a>
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
@@ -235,8 +306,8 @@
     const LAND_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json";
 
     // Distance max considérée comme 5K.
-    // 0.025 km = 25 mètres. Change à 0.05 si tu veux être plus large.
-    const FIVE_K_MAX_DISTANCE_KM = 0.025;
+    // 0.2 km = 200 mètres.
+    const FIVE_K_MAX_DISTANCE_KM = 0.2;
 
     const svg = d3.select("#globe");
     const tooltip = d3.select("#tooltip");
@@ -562,11 +633,6 @@
 
         const player = String(pick(row, ["player", "name", "player_name"]) || "unknown");
         const playerId = String(pick(row, ["player_id", "user_id"]) || normalizePlayerId(player));
-        const avatarUrl = String(pick(row, [
-          "avatar_url", "avatar", "profile_picture", "profilePicture",
-          "pin_url", "pin", "image", "picture"
-        ]) || "");
-
         records.push({
           lat,
           lng,
@@ -576,7 +642,7 @@
           round: String(pick(row, ["round", "round_number"]) || ""),
           player_id: playerId,
           player,
-          avatar_url: avatarUrl,
+          avatar_url: "",
           source_file: sourceName
         });
       }
@@ -680,6 +746,67 @@
     svg.on("dblclick.zoom", null);
     svg.on("dblclick", () => setTargetRotation([0, -20, 0]));
 
+    function buildPlayerRanking(points) {
+      const players = new Map();
+
+      points.forEach(point => {
+        const uniquePlayersOnPoint = new Set();
+
+        point.records.forEach(rec => {
+          const displayName = rec.player || rec.player_id || "unknown";
+          const key = normalizePlayerId(displayName);
+
+          if (!players.has(key)) {
+            players.set(key, {
+              id: rec.player_id || key,
+              name: displayName,
+              avatar_url: rec.avatar_url || "",
+              uniquePoints: 0,
+              rounds: 0
+            });
+          }
+
+          const player = players.get(key);
+          if (!player.avatar_url && rec.avatar_url) player.avatar_url = rec.avatar_url;
+
+          player.rounds += 1;
+          uniquePlayersOnPoint.add(key);
+        });
+
+        uniquePlayersOnPoint.forEach(key => {
+          const player = players.get(key);
+          if (player) player.uniquePoints += 1;
+        });
+      });
+
+      return [...players.values()].sort((a, b) => {
+        if (b.uniquePoints !== a.uniquePoints) return b.uniquePoints - a.uniquePoints;
+        if (b.rounds !== a.rounds) return b.rounds - a.rounds;
+        return a.name.localeCompare(b.name);
+      });
+    }
+
+    function renderPlayerRanking(ranking) {
+      const tbody = document.getElementById("player-ranking");
+
+      if (!ranking.length) {
+        tbody.innerHTML = `<tr><td colspan="3">Aucun 5K trouvé</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = ranking.map(player => `
+        <tr>
+          <td>
+            <span class="player-row">
+              ${avatarHtml(player)}
+            </span>
+          </td>
+          <td class="num">${player.uniquePoints}</td>
+          <td class="num">${player.rounds}</td>
+        </tr>
+      `).join("");
+    }
+
     async function load() {
       try {
         const [world, ...tsvTexts] = await Promise.all([
@@ -702,6 +829,8 @@
           `${pointData.length} lieux 5K uniques · récupération des avatars…`;
 
         await hydrateMissingAvatars(pointData);
+
+        renderPlayerRanking(buildPlayerRanking(pointData));
 
         const totalPlayers = new Set();
         pointData.forEach(point => point.players.forEach(p => totalPlayers.add(p.id || p.name)));
