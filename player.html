@@ -246,30 +246,20 @@
     color:#ff9d7a;
   }
 
-  .stat-5k-inline{
-    display:inline-flex;
-    align-items:baseline;
-    gap:4px;
-  }
-
-  .stat-5k-inline a{
+  .stat-link{
     color:inherit;
     text-decoration:none;
     border-radius:7px;
     padding:0 3px;
   }
 
-  .stat-5k-inline a:hover{
+  .stat-link:hover{
     text-decoration:underline;
     background:rgba(97,168,255,.10);
   }
 
-  .stat-5k-label{
+  .stat-label .stat-link{
     color:var(--accent);
-  }
-
-  .stat-5k-count{
-    color:#fff;
   }
 
 </style>
@@ -587,24 +577,14 @@ function buildPlayer5KUrl(playerParam, playerIdParam) {
   return `points_5k.html?player=${encodeURIComponent(playerParam)}`;
 }
 
+function render5KLabel() {
+  return `<a class="stat-link" href="points_5k.html" title="Voir la carte de tous les points 5K du daily">5K</a>`;
+}
+
 function render5KStatValue(total5k, playerParam, playerIdParam) {
   const playerUrl = buildPlayer5KUrl(playerParam, playerIdParam);
 
-  return `
-    <span class="stat-5k-inline">
-      <a
-        class="stat-5k-label"
-        href="points_5k.html"
-        title="Voir la carte de tous les points 5K du daily"
-      >5K</a>
-      <span>:</span>
-      <a
-        class="stat-5k-count"
-        href="${esc(playerUrl)}"
-        title="Voir uniquement les points 5K de ce joueur"
-      >${esc(total5k)}</a>
-    </span>
-  `;
+  return `<a class="stat-link" href="${esc(playerUrl)}" title="Voir uniquement les points 5K de ce joueur">${esc(total5k)}</a>`;
 }
 
 function streakClass(n) {
@@ -627,7 +607,7 @@ function renderSummary(rows, currentSeason, roundRows, allTotals, playerParam, p
     ["Streak", `${streak.current} (${streak.max})`, streakClass(streak.current)],
     ["Participations", scores.length, ""],
     ["Saisons", seasons.length, ""],
-    ["", render5KStatValue(total5k, playerParam, playerIdParam), ""],
+    [render5KLabel(), render5KStatValue(total5k, playerParam, playerIdParam), ""],
     ["Meilleur score", scores.length ? formatScore(Math.max(...scores)) : "—", ""],
 
     ["Moyenne", scores.length ? formatScore(Math.round(average(scores))) : "—", ""],
@@ -637,11 +617,12 @@ function renderSummary(rows, currentSeason, roundRows, allTotals, playerParam, p
   ];
 
   return stats.map(([label, value, extraClass]) => {
-    const isHtmlValue = String(value).includes("stat-5k-inline");
+    const isHtmlLabel = String(label).includes("stat-link");
+    const isHtmlValue = String(value).includes("stat-link");
 
     return `
       <div class="stat">
-        ${label ? `<div class="stat-label">${esc(label)}</div>` : `<div class="stat-label">&nbsp;</div>`}
+        <div class="stat-label">${isHtmlLabel ? label : esc(label)}</div>
         <div class="stat-value ${esc(extraClass || "")}">${isHtmlValue ? value : esc(value)}</div>
       </div>
     `;
