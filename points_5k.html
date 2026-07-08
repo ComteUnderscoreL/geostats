@@ -212,6 +212,32 @@
       font-weight: 700;
     }
 
+    .player-table a,
+    .players a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .player-table a:hover,
+    .players a:hover {
+      text-decoration: underline;
+    }
+
+    .filter-note {
+      margin-top: 8px;
+      color: rgba(255,255,255,0.62);
+      font-size: 13px;
+    }
+
+    .filter-note a {
+      color: #61a8ff;
+      text-decoration: none;
+    }
+
+    .filter-note a:hover {
+      text-decoration: underline;
+    }
+
     .color-dot {
       display: inline-block;
       width: 13px;
@@ -299,6 +325,9 @@
     const TSV_URL = "https://raw.githubusercontent.com/ComteUnderscoreL/geostats/main/data/rounds.tsv";
     const LAND_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json";
     const FIVE_K_MAX_DISTANCE_KM = 0.2;
+
+    const params = new URLSearchParams(window.location.search);
+    const selectedPlayerParam = params.get("player") || "";
 
     const svg = d3.select("#globe");
     const tooltip = d3.select("#tooltip");
@@ -392,10 +421,10 @@
       const color = colorForPlayer(player);
 
       return `
-        <span class="player-pill" title="${safeName}" style="--player-color:${color}">
+        <a class="player-pill" href="${playerFilterUrl(player)}" title="Filtrer la carte sur ${safeName}" style="--player-color:${color}">
           <span class="player-color"></span>
           <span>${safeName}</span>
-        </span>
+        </a>
       `;
     }
 
@@ -406,6 +435,22 @@
 
     function streetViewUrl(lng, lat) {
       return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
+    }
+
+    function playerFilterUrl(player) {
+      return `points_5k.html?player=${encodeURIComponent(player.id || player.name)}`;
+    }
+
+    function playerMatches(player, wanted) {
+      if (!wanted) return true;
+      const w = normalizePlayerId(wanted);
+      return normalizePlayerId(player.id) === w || normalizePlayerId(player.name) === w;
+    }
+
+    function recordMatchesPlayer(record, wanted) {
+      if (!wanted) return true;
+      const w = normalizePlayerId(wanted);
+      return normalizePlayerId(record.player_id) === w || normalizePlayerId(record.player) === w;
     }
 
     function formatCoord(value) {
@@ -633,6 +678,23 @@
       }));
     }
 
+    function filterPointsByPlayer(points, wanted) {
+      if (!wanted) return points;
+
+      return points
+        .map(point => {
+          const players = point.players.filter(player => playerMatches(player, wanted));
+          const records = point.records.filter(record => recordMatchesPlayer(record, wanted));
+
+          return {
+            ...point,
+            players,
+            records
+          };
+        })
+        .filter(point => point.players.length > 0);
+    }
+
     function buildPlayerRanking(points) {
       const players = new Map();
 
@@ -669,7 +731,9 @@
       tbody.innerHTML = ranking.map(player => `
         <tr>
           <td>${playerPillHtml(player)}</td>
-          <td class="num">${player.uniquePoints}</td>
+          <td class="num">
+            <a href="${playerFilterUrl(player)}" title="Voir uniquement les points 5K de ${escapeHtml(player.name)}">${player.uniquePoints}</a>
+          </td>
         </tr>
       `).join("");
     }
@@ -735,17 +799,28 @@
 
         const rows = d3.tsvParse(tsvText);
         const records = tsvRowsTo5kRecords(rows);
-        pointData = groupRecords(records);
+        const allPointData = groupRecords(records);
 
-        const ranking = buildPlayerRanking(pointData);
+        const ranking = buildPlayerRanking(allPointData);
         buildPlayerColors(ranking);
         renderPlayerRanking(ranking);
+
+        pointData = filterPointsByPlayer(allPointData, selectedPlayerParam);
 
         const totalPlayers = new Set();
         pointData.forEach(point => point.players.forEach(p => totalPlayers.add(p.id || p.name)));
 
-        document.getElementById("stats").textContent =
-          `${pointData.length} lieux 5K uniques · ${records.length} rounds 5K · ${totalPlayers.size} joueurs`;
+        if (selectedPlayerParam) {
+          document.querySelector(".subtitle").textContent =
+            `Points 5K filtrés pour ${selectedPlayerParam}`;
+
+          document.getElementById("stats").innerHTML =
+            `${pointData.length} lieux 5K uniques · ${totalPlayers.size} joueur<br>` +
+            `<span class="filter-note"><a href="points_5k.html">Afficher tous les joueurs</a></span>`;
+        } else {
+          document.getElementById("stats").textContent =
+            `${pointData.length} lieux 5K uniques · ${records.length} rounds 5K · ${totalPlayers.size} joueurs`;
+        }
 
         redraw();
       } catch (error) {
