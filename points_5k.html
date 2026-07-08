@@ -92,19 +92,14 @@
       pointer-events: all;
     }
 
-    .point.single {
-      fill: #6ee7ff;
-    }
+    .point.single { fill: #6ee7ff; }
+    .point.multi { fill: #f2b705; }
 
     .point:hover {
       opacity: 1;
       stroke: #ffffff;
       stroke-width: 2;
       filter: drop-shadow(0 0 6px rgba(255,255,255,0.85));
-    }
-
-    .point.multi {
-      fill: #f2b705;
     }
 
     .tooltip {
@@ -166,24 +161,6 @@
       flex: 0 0 auto;
     }
 
-    .bottom-link {
-      position: fixed;
-      left: 16px;
-      bottom: 14px;
-      color: rgba(255,255,255,0.55);
-      font-size: 13px;
-      z-index: 2;
-      text-decoration: none;
-      background: none;
-      border: none;
-      padding: 0;
-    }
-
-    .bottom-link:hover {
-      color: rgba(255,255,255,0.9);
-      text-decoration: underline;
-    }
-
     .player-table-section {
       max-width: 720px;
       margin: 20px auto 46px;
@@ -222,19 +199,29 @@
       background: rgba(255,255,255,0.06);
     }
 
-    .player-table tr:last-child td {
-      border-bottom: none;
-    }
+    .player-table tr:last-child td { border-bottom: none; }
 
     .player-table .num {
       text-align: right;
       font-weight: 700;
     }
 
-    .player-row {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+    .bottom-link {
+      position: fixed;
+      left: 16px;
+      bottom: 14px;
+      color: rgba(255,255,255,0.55);
+      font-size: 13px;
+      z-index: 2;
+      text-decoration: none;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    .bottom-link:hover {
+      color: rgba(255,255,255,0.9);
+      text-decoration: underline;
     }
 
     @media (max-width: 700px) {
@@ -293,19 +280,14 @@
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
   <script>
-    const TSV_URLS = [
-      "https://raw.githubusercontent.com/ComteUnderscoreL/geostats/main/data/rounds.tsv"
-    ];
-
+    const TSV_URL = "https://raw.githubusercontent.com/ComteUnderscoreL/geostats/main/data/rounds.tsv";
     const LAND_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json";
-
-    // Distance max considérée comme 5K.
-    // 0.2 km = 200 mètres.
     const FIVE_K_MAX_DISTANCE_KM = 0.2;
 
     const svg = d3.select("#globe");
     const tooltip = d3.select("#tooltip");
-    const width = 900, height = 900;
+    const width = 900;
+    const height = 900;
 
     let baseScale = 390;
     let currentScale = baseScale;
@@ -326,7 +308,6 @@
     const sphere = { type: "Sphere" };
 
     const g = svg.append("g");
-
     g.append("path").datum(sphere).attr("class", "sphere");
     g.append("path").datum(graticule).attr("class", "graticule");
 
@@ -340,11 +321,6 @@
 
     function clampLat(lat) {
       return Math.max(-89.5, Math.min(89.5, lat));
-    }
-
-    function isVisible(lng, lat) {
-      const rotated = d3.geoRotation(projection.rotate())([lng, lat]);
-      return rotated[0] > -90 && rotated[0] < 90;
     }
 
     function parseNumber(value) {
@@ -378,14 +354,6 @@
         .replace(/[^a-z0-9_-]/g, "") || "unknown";
     }
 
-    function streetViewUrl(lng, lat) {
-      return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
-    }
-
-    function formatCoord(value) {
-      return Number(value).toFixed(5);
-    }
-
     function escapeHtml(value) {
       return String(value || "")
         .replaceAll("&", "&amp;")
@@ -405,33 +373,32 @@
         </span>
       `;
     }
-        });
-      });
 
-      await Promise.all([...playersById.values()].map(async player => {
-        const avatar = await fetchGeoGuessrAvatar(player.id);
-        if (avatar) player.avatar_url = avatar;
-      }));
+    function isVisible(lng, lat) {
+      const rotated = d3.geoRotation(projection.rotate())([lng, lat]);
+      return rotated[0] > -90 && rotated[0] < 90;
+    }
+
+    function streetViewUrl(lng, lat) {
+      return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
+    }
+
+    function formatCoord(value) {
+      return Number(value).toFixed(5);
     }
 
     function positionTooltip(event) {
       const pad = 14;
-
       let left = event.clientX + pad;
       let top = event.clientY + pad;
 
-      tooltip
-        .style("left", `${left}px`)
-        .style("top", `${top}px`);
+      tooltip.style("left", `${left}px`).style("top", `${top}px`);
 
       const rect = tooltip.node().getBoundingClientRect();
-
       if (rect.right > window.innerWidth - 8) left = event.clientX - rect.width - pad;
       if (rect.bottom > window.innerHeight - 8) top = event.clientY - rect.height - pad;
 
-      tooltip
-        .style("left", `${Math.max(8, left)}px`)
-        .style("top", `${Math.max(8, top)}px`);
+      tooltip.style("left", `${Math.max(8, left)}px`).style("top", `${Math.max(8, top)}px`);
     }
 
     function showTooltip(event, d) {
@@ -466,15 +433,13 @@
 
       const radius = Math.max(1.6, Math.min(4.5, currentScale / 160));
 
-      const points = pointGroup
-        .selectAll("circle")
-        .data(pointData, d => d.key);
+      const points = pointGroup.selectAll("circle").data(pointData, d => d.key);
 
       points.enter()
         .append("circle")
         .attr("class", d => d.players.length > 1 ? "point multi" : "point single")
         .on("mouseenter", (event, d) => showTooltip(event, d))
-        .on("mousemove", (event) => positionTooltip(event))
+        .on("mousemove", event => positionTooltip(event))
         .on("mouseleave", hideTooltip)
         .on("click", (event, d) => window.open(streetViewUrl(d.lng, d.lat), "_blank"))
         .merge(points)
@@ -504,7 +469,6 @@
 
       smoothTimer = d3.timer(() => {
         const ease = 0.18;
-
         let lonDiff = targetRotation[0] - rotation[0];
 
         if (lonDiff > 180) lonDiff -= 360;
@@ -532,7 +496,7 @@
       startSmoothLoop();
     }
 
-    function tsvRowsTo5kRecords(rows, sourceName) {
+    function tsvRowsTo5kRecords(rows) {
       const records = [];
 
       for (const row of rows) {
@@ -545,6 +509,7 @@
 
         const player = String(pick(row, ["player", "name", "player_name"]) || "unknown");
         const playerId = String(pick(row, ["player_id", "user_id"]) || normalizePlayerId(player));
+
         records.push({
           lat,
           lng,
@@ -553,8 +518,7 @@
           numero: String(pick(row, ["numero", "challenge", "challenge_id", "id"]) || ""),
           round: String(pick(row, ["round", "round_number"]) || ""),
           player_id: playerId,
-          player,
-          source_file: sourceName
+          player
         });
       }
 
@@ -579,20 +543,12 @@
         }
 
         const point = grouped.get(key);
-
-        // Dédup joueur sur un même point.
-        // On privilégie le pseudo normalisé, car le player_id peut être absent/différent
-        // selon les exports TSV rounds.tsv / rounds2.tsv.
         const displayName = rec.player || rec.player_id || "unknown";
         const playerKey = normalizePlayerId(displayName);
-        const playerId = rec.player_id || playerKey;
-
-        const existingPlayer = point.players.get(playerKey);
 
         point.players.set(playerKey, {
-          id: existingPlayer?.id || playerId,
-          name: existingPlayer?.name || displayName,
-          avatar_url: existingPlayer?.avatar_url || rec.avatar_url || ""
+          id: rec.player_id || playerKey,
+          name: displayName
         });
 
         point.records.push(rec);
@@ -608,6 +564,47 @@
       }));
     }
 
+    function buildPlayerRanking(points) {
+      const players = new Map();
+
+      points.forEach(point => {
+        point.players.forEach(player => {
+          const key = normalizePlayerId(player.name);
+
+          if (!players.has(key)) {
+            players.set(key, {
+              id: player.id || key,
+              name: player.name || key,
+              uniquePoints: 0
+            });
+          }
+
+          players.get(key).uniquePoints += 1;
+        });
+      });
+
+      return [...players.values()].sort((a, b) => {
+        if (b.uniquePoints !== a.uniquePoints) return b.uniquePoints - a.uniquePoints;
+        return a.name.localeCompare(b.name);
+      });
+    }
+
+    function renderPlayerRanking(ranking) {
+      const tbody = document.getElementById("player-ranking");
+
+      if (!ranking.length) {
+        tbody.innerHTML = `<tr><td colspan="2">Aucun 5K trouvé</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = ranking.map(player => `
+        <tr>
+          <td>${playerPillHtml(player)}</td>
+          <td class="num">${player.uniquePoints}</td>
+        </tr>
+      `).join("");
+    }
+
     let dragStart = null;
     let dragStartRotation = null;
 
@@ -619,7 +616,6 @@
         }
 
         hideTooltip();
-
         dragStart = [event.x, event.y];
         dragStartRotation = [...rotation];
         targetRotation = [...rotation];
@@ -631,10 +627,12 @@
         const dx = event.x - dragStart[0];
         const dy = event.y - dragStart[1];
 
-        const newLon = dragStartRotation[0] + dx * speed;
-        const newLat = dragStartRotation[1] - dy * speed;
+        targetRotation = [
+          normalizeLon(dragStartRotation[0] + dx * speed),
+          clampLat(dragStartRotation[1] - dy * speed),
+          0
+        ];
 
-        targetRotation = [normalizeLon(newLon), clampLat(newLat), 0];
         applyRotation(targetRotation);
       })
       .on("end", () => {
@@ -657,78 +655,17 @@
     svg.on("dblclick.zoom", null);
     svg.on("dblclick", () => setTargetRotation([0, -20, 0]));
 
-    function buildPlayerRanking(points) {
-      const players = new Map();
-
-      points.forEach(point => {
-        const uniquePlayersOnPoint = new Set();
-
-        point.records.forEach(rec => {
-          const displayName = rec.player || rec.player_id || "unknown";
-          const key = normalizePlayerId(displayName);
-
-          if (!players.has(key)) {
-            players.set(key, {
-              id: rec.player_id || key,
-              name: displayName,
-              uniquePoints: 0,
-              rounds: 0
-            });
-          }
-
-          const player = players.get(key);
-          player.rounds += 1;
-          uniquePlayersOnPoint.add(key);
-        });
-
-        uniquePlayersOnPoint.forEach(key => {
-          const player = players.get(key);
-          if (player) player.uniquePoints += 1;
-        });
-      });
-
-      return [...players.values()].sort((a, b) => {
-        if (b.uniquePoints !== a.uniquePoints) return b.uniquePoints - a.uniquePoints;
-        return a.name.localeCompare(b.name);
-      });
-    }
-
-    function renderPlayerRanking(ranking) {
-      const tbody = document.getElementById("player-ranking");
-
-      if (!ranking.length) {
-        tbody.innerHTML = `<tr><td colspan="2">Aucun 5K trouvé</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = ranking.map(player => `
-        <tr>
-          <td>
-            <span class="player-row">
-              ${playerPillHtml(player)}
-            </span>
-          </td>
-          <td class="num">${player.uniquePoints}</td>
-        </tr>
-      `).join("");
-    }
-
     async function load() {
       try {
-        const [world, ...tsvTexts] = await Promise.all([
+        const [world, tsvText] = await Promise.all([
           d3.json(LAND_URL),
-          ...TSV_URLS.map(url => d3.text(url + "?v=" + Date.now()))
+          d3.text(TSV_URL + "?v=" + Date.now())
         ]);
 
         landData = topojson.feature(world, world.objects.land);
 
-        const records = [];
-
-        tsvTexts.forEach((text, i) => {
-          const rows = d3.tsvParse(text);
-          records.push(...tsvRowsTo5kRecords(rows, TSV_URLS[i].split("/").pop()));
-        });
-
+        const rows = d3.tsvParse(tsvText);
+        const records = tsvRowsTo5kRecords(rows);
         pointData = groupRecords(records);
 
         renderPlayerRanking(buildPlayerRanking(pointData));
@@ -742,7 +679,7 @@
         redraw();
       } catch (error) {
         console.error(error);
-        document.getElementById("stats").textContent = "Impossible de charger les TSV de geostats";
+        document.getElementById("stats").textContent = "Impossible de charger rounds.tsv";
       }
     }
 
