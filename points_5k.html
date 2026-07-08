@@ -152,22 +152,18 @@
       font-size: 12px;
     }
 
-    .player-avatar {
+    .player-initial {
+      display: inline-grid;
+      place-items: center;
       width: 22px;
       height: 22px;
       border-radius: 50%;
-      object-fit: cover;
       background: rgba(255,255,255,0.16);
       border: 1px solid rgba(255,255,255,0.24);
-      flex: 0 0 auto;
-    }
-
-    .player-avatar.fallback {
-      display: inline-grid;
-      place-items: center;
       font-size: 11px;
       font-weight: 700;
       color: rgba(255,255,255,0.9);
+      flex: 0 0 auto;
     }
 
     .bottom-link {
@@ -283,11 +279,10 @@
           <tr>
             <th>Joueur</th>
             <th class="num">Points 5K</th>
-            <th class="num">Rounds 5K</th>
           </tr>
         </thead>
         <tbody id="player-ranking">
-          <tr><td colspan="3">Chargement…</td></tr>
+          <tr><td colspan="2">Chargement…</td></tr>
         </tbody>
       </table>
     </div>
@@ -299,8 +294,7 @@
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
   <script>
     const TSV_URLS = [
-      "https://raw.githubusercontent.com/ComteUnderscoreL/geostats/main/data/rounds.tsv",
-      "https://raw.githubusercontent.com/ComteUnderscoreL/geostats/main/data/rounds2.tsv"
+      "https://raw.githubusercontent.com/ComteUnderscoreL/geostats/main/data/rounds.tsv"
     ];
 
     const LAND_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json";
@@ -400,99 +394,17 @@
         .replaceAll('"', "&quot;");
     }
 
-    function avatarHtml(player) {
+    function playerPillHtml(player) {
       const name = player.name || player.id || "unknown";
       const safeName = escapeHtml(name);
 
-      if (player.avatar_url) {
-        return `
-          <span class="player-pill" title="${safeName}">
-            <img class="player-avatar" src="${escapeHtml(player.avatar_url)}" alt="${safeName}" referrerpolicy="no-referrer">
-            <span>${safeName}</span>
-          </span>
-        `;
-      }
-
       return `
         <span class="player-pill" title="${safeName}">
-          <span class="player-avatar fallback">${safeName.slice(0, 1).toUpperCase()}</span>
+          <span class="player-initial">${safeName.slice(0, 1).toUpperCase()}</span>
           <span>${safeName}</span>
         </span>
       `;
     }
-
-    function findAvatarUrlInObject(obj) {
-      const wantedKeys = [
-        "avatar", "avatarUrl", "avatar_url",
-        "profilePicture", "profile_picture",
-        "pin", "pinUrl", "pin_url",
-        "image", "picture"
-      ];
-
-      function walk(value) {
-        if (!value || typeof value !== "object") return "";
-
-        if (Array.isArray(value)) {
-          for (const item of value) {
-            const found = walk(item);
-            if (found) return found;
-          }
-          return "";
-        }
-
-        for (const key of wantedKeys) {
-          const candidate = value[key];
-
-          if (typeof candidate === "string" && /^https?:\/\//.test(candidate)) {
-            return candidate;
-          }
-
-          if (candidate && typeof candidate === "object") {
-            const found = walk(candidate);
-            if (found) return found;
-          }
-        }
-
-        for (const item of Object.values(value)) {
-          const found = walk(item);
-          if (found) return found;
-        }
-
-        return "";
-      }
-
-      return walk(obj);
-    }
-
-    async function fetchGeoGuessrAvatar(playerId) {
-      if (!playerId || playerId === "unknown") return "";
-
-      const urls = [
-        `https://www.geoguessr.com/api/v3/users/${encodeURIComponent(playerId)}`,
-        `https://www.geoguessr.com/api/v3/profiles/${encodeURIComponent(playerId)}`
-      ];
-
-      for (const url of urls) {
-        try {
-          const data = await d3.json(url);
-          const avatar = findAvatarUrlInObject(data);
-          if (avatar) return avatar;
-        } catch (error) {
-          // CORS/login/API change: fallback sur initiale ou colonne avatar_url.
-        }
-      }
-
-      return "";
-    }
-
-    async function hydrateMissingAvatars(points) {
-      const playersById = new Map();
-
-      points.forEach(point => {
-        point.players.forEach(player => {
-          if (player.id && !player.avatar_url) {
-            playersById.set(player.id, player);
-          }
         });
       });
 
@@ -523,7 +435,7 @@
     }
 
     function showTooltip(event, d) {
-      const players = d.players.slice(0, 14).map(avatarHtml).join("");
+      const players = d.players.slice(0, 14).map(playerPillHtml).join("");
       const more = d.players.length > 14 ? `<span class="player-pill">+${d.players.length - 14}</span>` : "";
 
       tooltip
@@ -642,7 +554,6 @@
           round: String(pick(row, ["round", "round_number"]) || ""),
           player_id: playerId,
           player,
-          avatar_url: "",
           source_file: sourceName
         });
       }
@@ -760,15 +671,12 @@
             players.set(key, {
               id: rec.player_id || key,
               name: displayName,
-              avatar_url: rec.avatar_url || "",
               uniquePoints: 0,
               rounds: 0
             });
           }
 
           const player = players.get(key);
-          if (!player.avatar_url && rec.avatar_url) player.avatar_url = rec.avatar_url;
-
           player.rounds += 1;
           uniquePlayersOnPoint.add(key);
         });
@@ -781,7 +689,6 @@
 
       return [...players.values()].sort((a, b) => {
         if (b.uniquePoints !== a.uniquePoints) return b.uniquePoints - a.uniquePoints;
-        if (b.rounds !== a.rounds) return b.rounds - a.rounds;
         return a.name.localeCompare(b.name);
       });
     }
@@ -790,7 +697,7 @@
       const tbody = document.getElementById("player-ranking");
 
       if (!ranking.length) {
-        tbody.innerHTML = `<tr><td colspan="3">Aucun 5K trouvé</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="2">Aucun 5K trouvé</td></tr>`;
         return;
       }
 
@@ -798,11 +705,10 @@
         <tr>
           <td>
             <span class="player-row">
-              ${avatarHtml(player)}
+              ${playerPillHtml(player)}
             </span>
           </td>
           <td class="num">${player.uniquePoints}</td>
-          <td class="num">${player.rounds}</td>
         </tr>
       `).join("");
     }
@@ -824,11 +730,6 @@
         });
 
         pointData = groupRecords(records);
-
-        document.getElementById("stats").textContent =
-          `${pointData.length} lieux 5K uniques · récupération des avatars…`;
-
-        await hydrateMissingAvatars(pointData);
 
         renderPlayerRanking(buildPlayerRanking(pointData));
 
