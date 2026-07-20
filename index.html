@@ -61,7 +61,7 @@
 
 <script>
 const BASE_URL = "https://www.geoguessr.com/challenge/";
-const TOP_N = 10;
+const TOP_N = 50;
 
 const MEDAL_PATHS = {
   netherite: "medal/netherite.svg",
@@ -372,7 +372,15 @@ function renderYT(pl) {
     el.innerHTML = renderYT(cfg.youtube_playlist);
   }
 
-  const totals = await loadTSV("data/totals.tsv");
+  const rawTotals = await loadTSV("data/totals.tsv");
+
+  const blacklist = JSON.parse(await loadText("data/blacklist.json"));
+  const bannedIds = new Set(blacklist.player_ids || []);
+
+  const totals = rawTotals.filter(
+    r => !bannedIds.has(String(r.player_id || "").trim())
+  );
+
   if (!totals.length) return;
 
   const currentSeason = getCurrentSeason(cfg, totals);
