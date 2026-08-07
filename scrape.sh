@@ -147,6 +147,11 @@ while :; do
 
   HC="$(curl_to_file "$HS_URL" "${OUTDIR}/scores.json")"
   if [[ "$HC" != "200" ]]; then
+    if [[ "$HC" == "404" && "$RANK_BASE" -eq 0 ]]; then
+      echo "[WARN] scores 404 — no scores yet for this challenge, continuing with empty totals/rounds" >&2
+      printf '{"items":[]}' > "${OUTDIR}/scores.json"
+      break
+    fi
     echo "ERR scores $HC" >&2
     exit 3
   fi
