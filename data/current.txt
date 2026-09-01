@@ -1,4 +1,4 @@
-date=2026-09-01
+date=2026-09-02
 saison=2
 challenge_id=WR9HDQQxw4Hs7v10
 twitch_channel=comte_L
