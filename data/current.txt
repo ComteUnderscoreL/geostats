@@ -1,5 +1,5 @@
-date=2026-10-03
+date=2026-10-04
 saison=3
-challenge_id=gHFGlxaxaEH4YI1p
+challenge_id=ASlAulAMPP5pWTi8
 twitch_channel=comte_L
 youtube_playlist=PLHQFZFMnBYhLZmNmTBlrAg27XfiAvELdQ
